@@ -19,6 +19,9 @@ export default async function StorePage() {
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {products.map((product) => (
           <article key={product.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            {product.image ? (
+              <img src={product.image} alt={product.name} className="product-image mb-4 w-full object-cover" />
+            ) : null}
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-slate-900">{product.name}</h2>
               <span className="text-sm font-semibold text-blue-600">{product.currency}{product.price.toFixed(2)}</span>

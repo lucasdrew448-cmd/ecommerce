@@ -9,6 +9,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     description: "A modern smartwatch with activity tracking and fast checkout support.",
     price: 149.0,
     currency: "$",
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80&auto=format&fit=crop",
     details: ["24/7 fitness monitoring", "Phone notifications", "Long battery life"],
   },
   {
@@ -18,6 +19,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     description: "A premium leather bag built for daily commerce and seamless shipping.",
     price: 98.0,
     currency: "$",
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&q=80&auto=format&fit=crop",
     details: ["Vegetable-tanned leather", "Spacious interior", "Designed for travel"],
   },
   {
@@ -27,6 +29,7 @@ const FALLBACK_PRODUCTS: Product[] = [
     description: "Lightweight sneakers designed for walking, running, and headless storefront demos.",
     price: 129.0,
     currency: "$",
+    image: "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?w=1200&q=80&auto=format&fit=crop",
     details: ["Breathable knit upper", "Cushioned midsole", "Water resistant"],
   },
 ];

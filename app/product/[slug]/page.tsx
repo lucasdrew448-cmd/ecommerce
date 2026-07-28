@@ -19,6 +19,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <main>
       <section className="section product-detail">
         <div>
+          {product.image ? (
+            <img src={product.image} alt={product.name} className="product-hero mb-6 w-full object-cover" />
+          ) : null}
           <p className="eyebrow">Product details</p>
           <h1>{product.name}</h1>
           <p className="product-description">{product.description}</p>
