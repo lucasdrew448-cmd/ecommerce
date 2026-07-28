@@ -61,7 +61,6 @@ export default function Header() {
           <Link href="/">Home</Link>
           <Link href="/store">Store</Link>
           <Link href="/about">About</Link>
-          <Link href="/checkout">Checkout</Link>
         </nav>
       </div>
     </header>
