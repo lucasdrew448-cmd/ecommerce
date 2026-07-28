@@ -18,7 +18,13 @@ export default function Header() {
           <Link href="/store">Store</Link>
           <Link href="/about">About</Link>
           <Link href="/checkout">Checkout</Link>
-          <Link href="/cart">Cart</Link>
+          <Link href="/cart" aria-label="View cart" className="cart-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="cart-icon" aria-hidden="true">
+              <path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L17 7H7" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="10" cy="19" r="1.5" />
+              <circle cx="17" cy="19" r="1.5" />
+            </svg>
+          </Link>
         </nav>
 
         <button

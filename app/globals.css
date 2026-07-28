@@ -327,6 +327,28 @@ p {
   }
 }
 
+.cart-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #0f172a;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.cart-link:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.cart-icon {
+  width: 20px;
+  height: 20px;
+}
+
 @import "tailwindcss";
 
 @layer base {
