@@ -41,6 +41,27 @@ export default async function HomePage() {
 
       <section className="section">
         <div className="section-header">
+          <h2>Why choose us</h2>
+          <p>Built for speed, flexibility, and a polished shopping experience from first click to checkout.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+            <h3 className="text-lg font-semibold text-slate-900">Fast and modern</h3>
+            <p className="mt-2 text-slate-600">A responsive interface and quick page transitions keep shoppers engaged.</p>
+          </div>
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+            <h3 className="text-lg font-semibold text-slate-900">Composable by design</h3>
+            <p className="mt-2 text-slate-600">Easily connect to APIs, services, or custom commerce logic as your business grows.</p>
+          </div>
+          <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+            <h3 className="text-lg font-semibold text-slate-900">Built for conversion</h3>
+            <p className="mt-2 text-slate-600">Clear product discovery, streamlined cart flows, and simple checkout steps reduce friction.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
           <h2>Featured products</h2>
           <p>Connect these pages to your commerce API or use the mock fallback data.</p>
         </div>
