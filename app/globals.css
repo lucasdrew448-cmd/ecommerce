@@ -226,6 +226,13 @@ p {
   align-items: center;
   gap: 16px;
   justify-content: space-between;
+  position: relative;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .brand a {
