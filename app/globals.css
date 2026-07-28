@@ -93,6 +93,7 @@ p {
   flex-direction: column;
   gap: 10px;
   margin-bottom: 24px;
+  padding: 0 10px;
 }
 
 .product-grid {
