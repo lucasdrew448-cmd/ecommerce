@@ -29,7 +29,7 @@ a {
 .page-shell {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 10px;
 }
 
 .hero,
@@ -422,7 +422,7 @@ p {
   .page-shell {
     max-width: 1180px;
     margin: 0 auto;
-    padding: 24px;
+    padding: 10px;
   }
 
   .hero,
