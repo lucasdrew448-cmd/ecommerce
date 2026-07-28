@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/commerce";
 import ProductDetailsClient from "@/components/ProductDetailsClient";
+import ProductGallery from "@/components/ProductGallery";
 
 interface ProductPageProps {
   params: {
@@ -19,9 +20,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <main>
       <section className="section product-detail">
         <div>
-          {product.image ? (
-            <img src={product.image} alt={product.name} className="product-hero mb-6 w-full object-cover" />
-          ) : null}
+          <ProductGallery product={product} />
           <p className="eyebrow">Product details</p>
           <h1>{product.name}</h1>
           <p className="product-description">{product.description}</p>
