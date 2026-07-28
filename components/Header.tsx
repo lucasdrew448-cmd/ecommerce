@@ -15,6 +15,7 @@ export default function Header() {
 
         <nav className={`nav ${open ? "open" : ""}`} aria-label="Main navigation">
           <Link href="/">Home</Link>
+          <Link href="/store">Store</Link>
           <Link href="/about">About</Link>
           <Link href="/cart">Cart</Link>
         </nav>
