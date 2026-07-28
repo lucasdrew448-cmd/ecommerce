@@ -29,6 +29,7 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
     }
 
     window.localStorage.setItem("headless-cart", JSON.stringify(cart));
+    window.dispatchEvent(new Event("cart-updated"));
     setAdded(true);
   };
 

@@ -1,10 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const STORAGE_KEY = "headless-cart";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const syncCartCount = () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      const cart = stored ? JSON.parse(stored) : [];
+      const count = cart.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+      setCartCount(count);
+    };
+
+    syncCartCount();
+    window.addEventListener("storage", syncCartCount);
+    window.addEventListener("cart-updated", syncCartCount);
+
+    return () => {
+      window.removeEventListener("storage", syncCartCount);
+      window.removeEventListener("cart-updated", syncCartCount);
+    };
+  }, []);
 
   return (
     <header className="site-header">
@@ -20,6 +45,7 @@ export default function Header() {
               <circle cx="10" cy="19" r="1.5" />
               <circle cx="17" cy="19" r="1.5" />
             </svg>
+            {cartCount > 0 ? <span className="cart-badge">{cartCount}</span> : null}
           </Link>
 
           <button
