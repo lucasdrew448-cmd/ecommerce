@@ -1,6 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+
+type CartItem = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  currency: string;
+  quantity: number;
+};
+
+const STORAGE_KEY = "headless-cart";
+
+function readCart(): CartItem[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return stored ? (JSON.parse(stored) as CartItem[]) : [];
+}
 
 export default function CheckoutPage() {
   const [form, setForm] = useState({
@@ -8,16 +28,21 @@ export default function CheckoutPage() {
     email: "",
     address: "",
   });
+  const [items, setItems] = useState<CartItem[]>([]);
 
-  const subtotal = 249.0;
-  const shipping = 12.0;
+  useEffect(() => {
+    setItems(readCart());
+  }, []);
+
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shipping = subtotal > 0 ? 12 : 0;
   const total = subtotal + shipping;
 
   const isComplete = useMemo(() => {
     return form.name && form.email && form.address;
   }, [form]);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     alert("Checkout complete — this is a demo flow for your headless storefront.");
   };
@@ -64,7 +89,7 @@ export default function CheckoutPage() {
           </div>
           <button
             type="submit"
-            className="w-full rounded-full bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700"
+            className="w-full rounded-full bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
             disabled={!isComplete}
           >
             Place order
@@ -74,20 +99,35 @@ export default function CheckoutPage() {
 
       <aside className="rounded-3xl border border-slate-200 bg-slate-50 p-8 shadow-sm">
         <h2 className="text-xl font-semibold text-slate-900">Order summary</h2>
-        <div className="mt-6 space-y-3 text-slate-600">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+        {items.length > 0 ? (
+          <div className="mt-6 space-y-3 text-slate-600">
+            {items.map((item) => (
+              <div key={item.id} className="flex items-center justify-between">
+                <span>
+                  {item.name} × {item.quantity}
+                </span>
+                <span>
+                  {item.currency}
+                  {(item.price * item.quantity).toFixed(2)}
+                </span>
+              </div>
+            ))}
+            <div className="flex justify-between border-t border-slate-200 pt-3 text-slate-700">
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Shipping</span>
+              <span>${shipping.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-semibold text-slate-900">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
           </div>
-          <div className="flex justify-between">
-            <span>Shipping</span>
-            <span>${shipping.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between border-t border-slate-200 pt-3 text-lg font-semibold text-slate-900">
-            <span>Total</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
-        </div>
+        ) : (
+          <p className="mt-6 text-slate-600">Your cart is empty. Add products before checking out.</p>
+        )}
       </aside>
     </main>
   );

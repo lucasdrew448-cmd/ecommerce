@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type CartItem = {
@@ -67,6 +68,11 @@ export default function CartClient() {
       <div className="cart-summary">
         <span>Total</span>
         <strong>{items[0]?.currency}{total.toFixed(2)}</strong>
+      </div>
+      <div className="mt-4 flex justify-end">
+        <Link href="/checkout" className="rounded-full bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
+          Proceed to checkout
+        </Link>
       </div>
     </div>
   );
