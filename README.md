@@ -7,6 +7,11 @@ Quick start
 - Install dependencies: `npm install` or `pnpm install`
 - Run the dev server: `npm run dev`
 
+Tailwind CSS
+
+- Tailwind is preconfigured. After installing dependencies, Tailwind will be available in the build pipeline via PostCSS.
+- If you need to regenerate CSS manually during development, run the Next.js dev server; PostCSS will process Tailwind directives in `app/globals.css`.
+
 Environment
 
 - Optionally set `NEXT_PUBLIC_COMMERCE_API_URL` to point to a headless commerce API with endpoints:
