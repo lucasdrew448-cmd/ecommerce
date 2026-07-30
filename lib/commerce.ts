@@ -56,22 +56,38 @@ function normalizeProduct(item: unknown): Product {
         : [];
 
       const additionalImagesValue = product.additional_images;
-      const additionalImages = Array.isArray(additionalImagesValue)
-        ? additionalImagesValue.filter((value): value is string => typeof value === "string")
-        : typeof additionalImagesValue === "string"
-        ? [additionalImagesValue]
-        : additionalImagesValue && typeof additionalImagesValue === "object"
-        ? (() => {
-            const nested = additionalImagesValue as Record<string, unknown>;
-            if (Array.isArray(nested.images)) {
-              return nested.images.filter((value): value is string => typeof value === "string");
-            }
-            if (typeof nested.url === "string") {
-              return [nested.url];
-            }
-            return [];
-          })()
-        : [];
+      const additionalImages = (() => {
+        if (Array.isArray(additionalImagesValue)) {
+          return additionalImagesValue.filter((value): value is string => typeof value === "string");
+        }
+
+        if (typeof additionalImagesValue === "string") {
+          return [additionalImagesValue];
+        }
+
+        if (additionalImagesValue && typeof additionalImagesValue === "object") {
+          const nested = additionalImagesValue as Record<string, unknown>;
+
+          if (Array.isArray(nested.images)) {
+            return nested.images.filter((value): value is string => typeof value === "string");
+          }
+
+          if (Array.isArray(nested.urls)) {
+            return nested.urls.filter((value): value is string => typeof value === "string");
+          }
+
+          if (typeof nested.url === "string") {
+            return [nested.url];
+          }
+
+          const objectValues = Object.values(nested).filter((value): value is string => typeof value === "string");
+          if (objectValues.length) {
+            return objectValues;
+          }
+        }
+
+        return [];
+      })();
 
       const orderedImages = [mainImage, ...directImages, ...additionalImages].filter(
         (value): value is string => typeof value === "string" && value.length > 0
