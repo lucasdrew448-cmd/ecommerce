@@ -33,29 +33,39 @@ function normalizeProduct(item: unknown): Product {
     description: typeof product.description === "string" ? product.description : "",
     price: typeof product.price === "number" && Number.isFinite(product.price) ? product.price : 0,
     currency: typeof product.currency === "string" ? product.currency : "$",
-    image:
-      typeof product.image === "string"
-        ? product.image
-        : typeof product.image_url === "string"
-        ? product.image_url
-        : typeof product.imageUrl === "string"
-        ? product.imageUrl
-        : undefined,
+    image: (() => {
+      const resolveImageValue = (value: unknown): string | undefined => {
+        if (typeof value === "string") {
+          return value;
+        }
+
+        if (value && typeof value === "object") {
+          const obj = value as Record<string, unknown>;
+          if (typeof obj.image === "string") {
+            return obj.image;
+          }
+          if (typeof obj.image_url === "string") {
+            return obj.image_url;
+          }
+          if (typeof obj.imageUrl === "string") {
+            return obj.imageUrl;
+          }
+          if (typeof obj.url === "string") {
+            return obj.url;
+          }
+          return undefined;
+        }
+
+        return undefined;
+      };
+
+      return (
+        resolveImageValue(product.image) ??
+        resolveImageValue(product.image_url) ??
+        resolveImageValue(product.imageUrl)
+      );
+    })(),
     images: (() => {
-      const mainImage =
-        typeof product.image === "string"
-          ? product.image
-          : typeof product.image_url === "string"
-          ? product.image_url
-          : typeof product.imageUrl === "string"
-          ? product.imageUrl
-          : undefined;
-
-      const directImages = Array.isArray(product.images)
-        ? (product.images as unknown[]).filter((value): value is string => typeof value === "string")
-        : [];
-
-      const additionalImagesValue = product.additional_images;
       const parseJson = (value: string) => {
         try {
           return JSON.parse(value) as unknown;
@@ -64,45 +74,77 @@ function normalizeProduct(item: unknown): Product {
         }
       };
 
-      const normalizedAdditionalImages = (() => {
-        const resolveValue = (value: unknown): string[] => {
-          if (Array.isArray(value)) {
-            return value.filter((item): item is string => typeof item === "string");
+      const resolveImageValue = (value: unknown): string | undefined => {
+        if (typeof value === "string") {
+          return value;
+        }
+
+        if (value && typeof value === "object") {
+          const obj = value as Record<string, unknown>;
+          if (typeof obj.image === "string") {
+            return obj.image;
+          }
+          if (typeof obj.image_url === "string") {
+            return obj.image_url;
+          }
+          if (typeof obj.imageUrl === "string") {
+            return obj.imageUrl;
+          }
+          if (typeof obj.url === "string") {
+            return obj.url;
+          }
+          return undefined;
+        }
+
+        return undefined;
+      };
+
+      const normalizeImageArray = (value: unknown): string[] => {
+        if (Array.isArray(value)) {
+          return value
+            .map(resolveImageValue)
+            .filter((src): src is string => typeof src === "string" && src.length > 0);
+        }
+
+        if (typeof value === "string") {
+          const parsed = parseJson(value);
+          if (Array.isArray(parsed)) {
+            return normalizeImageArray(parsed);
           }
 
-          if (typeof value === "string") {
-            const parsed = parseJson(value);
-            if (Array.isArray(parsed)) {
-              return parsed.filter((item): item is string => typeof item === "string");
-            }
-            return [value];
+          const resolved = resolveImageValue(parsed);
+          return resolved ? [resolved] : [value];
+        }
+
+        if (value && typeof value === "object") {
+          const obj = value as Record<string, unknown>;
+
+          if (Array.isArray(obj.images)) {
+            return normalizeImageArray(obj.images);
           }
 
-          if (value && typeof value === "object") {
-            const nested = value as Record<string, unknown>;
-
-            if (Array.isArray(nested.images)) {
-              return nested.images.filter((item): item is string => typeof item === "string");
-            }
-
-            if (Array.isArray(nested.urls)) {
-              return nested.urls.filter((item): item is string => typeof item === "string");
-            }
-
-            if (typeof nested.url === "string") {
-              return [nested.url];
-            }
-
-            return Object.values(nested).filter((item): item is string => typeof item === "string");
+          if (Array.isArray(obj.urls)) {
+            return normalizeImageArray(obj.urls);
           }
 
-          return [];
-        };
+          const resolved = resolveImageValue(obj);
+          if (resolved) {
+            return [resolved];
+          }
 
-        return resolveValue(additionalImagesValue);
-      })();
+          return Object.values(obj).flatMap(normalizeImageArray);
+        }
 
-      const additionalImages = normalizedAdditionalImages;
+        return [];
+      };
+
+      const mainImage =
+        resolveImageValue(product.image) ??
+        resolveImageValue(product.image_url) ??
+        resolveImageValue(product.imageUrl);
+
+      const directImages = normalizeImageArray(product.images);
+      const additionalImages = normalizeImageArray(product.additional_images);
 
       const orderedImages = [mainImage, ...directImages, ...additionalImages].filter(
         (value): value is string => typeof value === "string" && value.length > 0
