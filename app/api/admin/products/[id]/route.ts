@@ -23,6 +23,13 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  await deleteAdminProduct(params.id, request.headers);
-  return NextResponse.json({ success: true });
+  try {
+    await deleteAdminProduct(params.id, request.headers);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to delete product." },
+      { status: 500 }
+    );
+  }
 }
