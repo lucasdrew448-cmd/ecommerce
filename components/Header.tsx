@@ -62,6 +62,7 @@ export default function Header() {
           <Link href="/store">Store</Link>
           <Link href="/about">About</Link>
           <Link href="/contact">Contact</Link>
+          <Link href="/admin">Admin</Link>
         </nav>
       </div>
     </header>
