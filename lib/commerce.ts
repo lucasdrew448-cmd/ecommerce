@@ -41,6 +41,23 @@ function normalizeProduct(item: unknown): Product {
         : typeof product.imageUrl === "string"
         ? product.imageUrl
         : undefined,
+    image_url:
+      typeof product.image_url === "string"
+        ? product.image_url
+        : typeof product.image === "string"
+        ? product.image
+        : typeof product.imageUrl === "string"
+        ? product.imageUrl
+        : undefined,
+    imageUrl:
+      typeof product.imageUrl === "string"
+        ? product.imageUrl
+        : typeof product.image_url === "string"
+        ? product.image_url
+        : typeof product.image === "string"
+        ? product.image
+        : undefined,
+    additional_images: product.additional_images,
     images: (() => {
       const mainImage =
         typeof product.image === "string"
