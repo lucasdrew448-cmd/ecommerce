@@ -40,6 +40,21 @@ export default function AdminProductsClient({ initialProducts }: AdminProductsCl
     setProducts(data as Product[]);
   };
 
+  const handleImageSelection = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      setForm((current) => ({ ...current, image: result }));
+      setMessage(`Selected ${file.name}.`);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -165,13 +180,20 @@ export default function AdminProductsClient({ initialProducts }: AdminProductsCl
           </div>
 
           <label className="grid gap-2">
-            <span>Image URL</span>
+            <span>Upload image from device</span>
             <input
-              value={form.image}
-              onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))}
-              className="rounded-lg border border-slate-300 px-3 py-2"
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelection}
+              className="rounded-lg border border-slate-300 px-3 py-2 file:mr-3 file:rounded-full file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-blue-700"
             />
           </label>
+
+          {form.image ? (
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+              <img src={form.image} alt="Selected product preview" className="h-48 w-full object-cover" />
+            </div>
+          ) : null}
 
           <label className="grid gap-2">
             <span>Details (one per line)</span>
