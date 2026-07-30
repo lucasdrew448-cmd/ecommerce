@@ -23,13 +23,41 @@ async function fetchCommerceApi<T>(path: string): Promise<T> {
   return response.json();
 }
 
+function normalizeProduct(item: unknown): Product {
+  const product = (item && typeof item === "object") ? (item as Record<string, unknown>) : {};
+
+  return {
+    id: typeof product.id === "string" ? product.id : String(product.slug ?? product.name ?? "unknown"),
+    slug: typeof product.slug === "string" ? product.slug : String(product.id ?? product.name ?? "unknown"),
+    name: typeof product.name === "string" ? product.name : "Untitled Product",
+    description: typeof product.description === "string" ? product.description : "",
+    price: typeof product.price === "number" && Number.isFinite(product.price) ? product.price : 0,
+    currency: typeof product.currency === "string" ? product.currency : "$",
+    image: typeof product.image === "string" ? product.image : undefined,
+    images: Array.isArray(product.images)
+      ? (product.images as unknown[]).filter((value): value is string => typeof value === "string")
+      : undefined,
+    details: Array.isArray(product.details)
+      ? (product.details as unknown[]).filter((value): value is string => typeof value === "string")
+      : [],
+  };
+}
+
 function normalizeProducts(data: unknown): Product[] {
   if (Array.isArray(data)) {
-    return data as Product[];
+    return data.map(normalizeProduct);
   }
 
-  if (data && typeof data === "object" && Array.isArray((data as any).products)) {
-    return (data as any).products as Product[];
+  if (data && typeof data === "object") {
+    const objectData = data as Record<string, unknown>;
+
+    if (Array.isArray(objectData.products)) {
+      return objectData.products.map(normalizeProduct);
+    }
+
+    if (Array.isArray(objectData.data)) {
+      return objectData.data.map(normalizeProduct);
+    }
   }
 
   return FALLBACK_PRODUCTS;
