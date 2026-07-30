@@ -162,10 +162,18 @@ function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
     return normalized;
   }
 
-  if (headers instanceof Headers) {
-    headers.forEach((value, key) => {
+  if (typeof (headers as { forEach?: unknown }).forEach === "function") {
+    (headers as { forEach: (callback: (value: string, key: string) => void) => void }).forEach((value, key) => {
       normalized[key] = value;
     });
+    return normalized;
+  }
+
+  if (typeof (headers as { get?: unknown }).get === "function") {
+    const cookieValue = (headers as { get: (name: string) => string | null }).get("cookie");
+    if (cookieValue) {
+      normalized.cookie = cookieValue;
+    }
     return normalized;
   }
 
@@ -222,7 +230,7 @@ export async function createAdminProduct(input: AdminProductInput, headers?: Hea
     const data = await fetchCommerceApi<unknown>("/products", {
       method: "POST",
       body: JSON.stringify(product),
-    });
+    }, headers);
     const normalizedProduct = normalizeProduct(data);
     adminProductStore = [normalizedProduct, ...adminProductStore.filter((item) => item.id !== normalizedProduct.id)];
     return normalizedProduct;

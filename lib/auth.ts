@@ -1,4 +1,15 @@
-import crypto from "crypto";
+declare function require(moduleName: string): any;
+declare const process: {
+  env: Record<string, string | undefined>;
+};
+
+const crypto = require("crypto") as {
+  createHmac: (algorithm: string, key: string) => {
+    update: (data: string) => {
+      digest: (encoding: string) => string;
+    };
+  };
+};
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
 export const ADMIN_COOKIE_NAME = "headless_admin";
@@ -30,9 +41,25 @@ async function fetchExternalAdminAuth(path: string, body: unknown): Promise<unkn
     body: JSON.stringify(body),
   });
 
-  const json = await response.json();
+  const rawText = await response.text();
+  let json: unknown = {};
+
+  if (rawText) {
+    try {
+      json = JSON.parse(rawText);
+    } catch {
+      json = rawText;
+    }
+  }
+
   if (!response.ok) {
-    throw new Error((json && typeof json === "object" && "error" in json ? (json as Record<string, unknown>).error : "External auth failed") as string);
+    const message =
+      typeof json === "object" && json !== null && "error" in json && typeof (json as Record<string, unknown>).error === "string"
+        ? (json as Record<string, unknown>).error
+        : typeof json === "string"
+          ? json
+          : "External auth failed";
+    throw new Error(message as string);
   }
 
   return json;
@@ -70,23 +97,30 @@ export function parseCookies(cookieHeader?: string | null): Record<string, strin
   }, {} as Record<string, string>);
 }
 
-export function verifyAdminTokenFromHeaders(headers?: HeadersInit): boolean {
+function getCookieHeaderFromHeaders(headers?: HeadersInit | { get?: (name: string) => string | null } | Record<string, unknown>): string | null {
   if (!headers) {
-    return false;
+    return null;
   }
 
-  let cookieHeader: string | null = null;
+  if (typeof (headers as { get?: unknown }).get === "function") {
+    return (headers as { get: (name: string) => string | null }).get("cookie");
+  }
 
   if (headers instanceof Headers) {
-    cookieHeader = headers.get("cookie");
-  } else if (Array.isArray(headers)) {
-    const cookieEntry = headers.find(([name]) => name.toLowerCase() === "cookie");
-    cookieHeader = cookieEntry ? cookieEntry[1] : null;
-  } else {
-    const header = (headers as Record<string, unknown>)["cookie"];
-    cookieHeader = typeof header === "string" ? header : null;
+    return headers.get("cookie");
   }
 
+  if (Array.isArray(headers)) {
+    const cookieEntry = headers.find(([name]) => name.toLowerCase() === "cookie");
+    return cookieEntry ? cookieEntry[1] : null;
+  }
+
+  const header = (headers as Record<string, unknown>).cookie;
+  return typeof header === "string" ? header : null;
+}
+
+export function verifyAdminTokenFromHeaders(headers?: HeadersInit): boolean {
+  const cookieHeader = getCookieHeaderFromHeaders(headers);
   const cookies = parseCookies(cookieHeader);
   return cookies[ADMIN_COOKIE_NAME] === getAdminToken();
 }
