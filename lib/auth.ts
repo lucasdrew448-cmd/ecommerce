@@ -1,28 +1,58 @@
 import crypto from "crypto";
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "password";
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
 export const ADMIN_COOKIE_NAME = "headless_admin";
 
-function computeToken(username: string, password: string) {
-  return crypto
-    .createHmac("sha256", ADMIN_SECRET)
-    .update(`${username}:${password}`)
-    .digest("hex");
-}
+const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "";
 
-export function verifyAdminCredentials(username: unknown, password: unknown): boolean {
-  return (
-    typeof username === "string" &&
-    typeof password === "string" &&
-    username === ADMIN_USERNAME &&
-    password === ADMIN_PASSWORD
-  );
+function computeToken(secret: string) {
+  return crypto.createHmac("sha256", ADMIN_SECRET).update(secret).digest("hex");
 }
 
 export function getAdminToken(): string {
-  return computeToken(ADMIN_USERNAME, ADMIN_PASSWORD);
+  return computeToken(ADMIN_SECRET);
+}
+
+function getExternalAdminAuthUrl(): string {
+  if (!EXTERNAL_ADMIN_AUTH_URL) {
+    throw new Error("External admin auth URL not configured. Set EXTERNAL_ADMIN_AUTH_URL.");
+  }
+  return EXTERNAL_ADMIN_AUTH_URL.replace(/\/$/, "");
+}
+
+async function fetchExternalAdminAuth(path: string, body: unknown): Promise<unknown> {
+  const url = `${getExternalAdminAuthUrl()}${path}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const json = await response.json();
+  if (!response.ok) {
+    throw new Error((json && typeof json === "object" && "error" in json ? (json as Record<string, unknown>).error : "External auth failed") as string);
+  }
+
+  return json;
+}
+
+export async function registerAdmin(email: string, password: string, fullName: string): Promise<unknown> {
+  return fetchExternalAdminAuth("/next-api/external-admin/auth/register", {
+    email,
+    password,
+    fullName,
+    adminSecret: ADMIN_SECRET,
+  });
+}
+
+export async function loginAdmin(email: string, password: string): Promise<unknown> {
+  return fetchExternalAdminAuth("/next-api/external-admin/auth/login", {
+    email,
+    password,
+    adminSecret: ADMIN_SECRET,
+  });
 }
 
 export function parseCookies(cookieHeader?: string | null): Record<string, string> {

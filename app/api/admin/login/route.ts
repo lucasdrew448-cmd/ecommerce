@@ -1,21 +1,30 @@
 import { NextResponse } from "next/server";
-import { createAdminCookie, verifyAdminCredentials } from "@/lib/auth";
+import { createAdminCookie, loginAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { username, password } = body ?? {};
+  try {
+    const body = await request.json();
+    const { email, password } = body ?? {};
 
-  if (!verifyAdminCredentials(username, password)) {
-    return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
-  }
-
-  return NextResponse.json(
-    { success: true },
-    {
-      status: 200,
-      headers: {
-        "Set-Cookie": createAdminCookie(),
-      },
+    if (typeof email !== "string" || typeof password !== "string") {
+      return NextResponse.json({ error: "Missing email or password." }, { status: 400 });
     }
-  );
+
+    await loginAdmin(email, password);
+
+    return NextResponse.json(
+      { success: true },
+      {
+        status: 200,
+        headers: {
+          "Set-Cookie": createAdminCookie(),
+        },
+      }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to authenticate." },
+      { status: 401 }
+    );
+  }
 }
