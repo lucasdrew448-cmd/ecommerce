@@ -41,9 +41,38 @@ function normalizeProduct(item: unknown): Product {
         : typeof product.imageUrl === "string"
         ? product.imageUrl
         : undefined,
-    images: Array.isArray(product.images)
-      ? (product.images as unknown[]).filter((value): value is string => typeof value === "string")
-      : undefined,
+    images: (() => {
+      const directImages = Array.isArray(product.images)
+        ? (product.images as unknown[]).filter((value): value is string => typeof value === "string")
+        : [];
+
+      if (directImages.length) {
+        return directImages;
+      }
+
+      const additionalImages = product.additional_images;
+      if (Array.isArray(additionalImages)) {
+        return additionalImages.filter((value): value is string => typeof value === "string");
+      }
+
+      if (typeof additionalImages === "string") {
+        return [additionalImages];
+      }
+
+      if (additionalImages && typeof additionalImages === "object") {
+        if (Array.isArray((additionalImages as Record<string, unknown>).images)) {
+          return ((additionalImages as Record<string, unknown>).images as unknown[]).filter(
+            (value): value is string => typeof value === "string"
+          );
+        }
+
+        if (typeof (additionalImages as Record<string, unknown>).url === "string") {
+          return [(additionalImages as Record<string, unknown>).url as string];
+        }
+      }
+
+      return undefined;
+    })(),
     details: Array.isArray(product.details)
       ? (product.details as unknown[]).filter((value): value is string => typeof value === "string")
       : [],
