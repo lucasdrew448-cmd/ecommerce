@@ -33,7 +33,14 @@ function normalizeProduct(item: unknown): Product {
     description: typeof product.description === "string" ? product.description : "",
     price: typeof product.price === "number" && Number.isFinite(product.price) ? product.price : 0,
     currency: typeof product.currency === "string" ? product.currency : "$",
-    image: typeof product.image === "string" ? product.image : undefined,
+    image:
+      typeof product.image === "string"
+        ? product.image
+        : typeof product.image_url === "string"
+        ? product.image_url
+        : typeof product.imageUrl === "string"
+        ? product.imageUrl
+        : undefined,
     images: Array.isArray(product.images)
       ? (product.images as unknown[]).filter((value): value is string => typeof value === "string")
       : undefined,
