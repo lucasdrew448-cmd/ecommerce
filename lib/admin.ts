@@ -226,46 +226,32 @@ export async function listAdminProducts(headers?: HeadersInit): Promise<Product[
 export async function createAdminProduct(input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const product = toProduct(input);
 
-  try {
-    const data = await fetchCommerceApi<unknown>("/products", {
-      method: "POST",
-      body: JSON.stringify(product),
-    }, headers);
-    const normalizedProduct = normalizeProduct(data);
-    adminProductStore = [normalizedProduct, ...adminProductStore.filter((item) => item.id !== normalizedProduct.id)];
-    return normalizedProduct;
-  } catch {
-    adminProductStore = [product, ...adminProductStore.filter((item) => item.id !== product.id)];
-    return product;
-  }
+  const data = await fetchCommerceApi<unknown>("/products", {
+    method: "POST",
+    body: JSON.stringify(product),
+  }, headers);
+  const normalizedProduct = normalizeProduct(data);
+  adminProductStore = [normalizedProduct, ...adminProductStore.filter((item) => item.id !== normalizedProduct.id)];
+  return normalizedProduct;
 }
 
 export async function updateAdminProduct(id: string, input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const existingProduct = adminProductStore.find((product) => product.id === id || product.slug === id);
   const product = toProduct(input, existingProduct);
 
-  try {
-    const data = await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
-      method: "PUT",
-      body: JSON.stringify(product),
-    }, headers);
-    const normalizedProduct = normalizeProduct(data);
-    adminProductStore = adminProductStore.map((item) => (item.id === id || item.slug === id ? normalizedProduct : item));
-    return normalizedProduct;
-  } catch {
-    adminProductStore = adminProductStore.map((item) => (item.id === id || item.slug === id ? product : item));
-    return product;
-  }
+  const data = await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify(product),
+  }, headers);
+  const normalizedProduct = normalizeProduct(data);
+  adminProductStore = adminProductStore.map((item) => (item.id === id || item.slug === id ? normalizedProduct : item));
+  return normalizedProduct;
 }
 
 export async function deleteAdminProduct(id: string, headers?: HeadersInit): Promise<void> {
-  try {
-    await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    }, headers);
-  } catch {
-    // fall back to local store updates if the external API is unavailable
-  }
+  await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }, headers);
 
   adminProductStore = adminProductStore.filter((product) => product.id !== id && product.slug !== id);
 }
