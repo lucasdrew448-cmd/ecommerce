@@ -5,6 +5,8 @@ import type { Product } from "@/lib/commerce";
 
 export default function ProductDetailsClient({ product }: { product: Product }) {
   const [added, setAdded] = useState(false);
+  const reservationFee = 20.0;
+  const formattedFee = `${product.currency}${reservationFee.toFixed(2)}`;
 
   const addToCart = () => {
     if (typeof window === "undefined") {
@@ -42,7 +44,7 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
           {added ? "Added to cart" : "Add to cart"}
         </button>
         <button className="button border border-blue-600 bg-white text-blue-600 hover:bg-blue-50">
-          Reserve with fee
+          Reserve with fee ({formattedFee})
         </button>
       </div>
     </div>
