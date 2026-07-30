@@ -26,9 +26,24 @@ async function fetchCommerceApi<T>(path: string): Promise<T> {
 function normalizeProduct(item: unknown): Product {
   const product = (item && typeof item === "object") ? (item as Record<string, unknown>) : {};
 
+  const slugValue =
+    typeof product.slug === "string"
+      ? product.slug
+      : typeof product.id === "string"
+      ? product.id
+      : typeof product.name === "string"
+      ? product.name
+      : "unknown";
+
+  const normalizedSlug = String(slugValue)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
   return {
     id: typeof product.id === "string" ? product.id : String(product.slug ?? product.name ?? "unknown"),
-    slug: typeof product.slug === "string" ? product.slug : String(product.id ?? product.name ?? "unknown"),
+    slug: normalizedSlug || "unknown",
     name: typeof product.name === "string" ? product.name : "Untitled Product",
     description: typeof product.description === "string" ? product.description : "",
     price: typeof product.price === "number" && Number.isFinite(product.price) ? product.price : 0,
@@ -152,15 +167,21 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  const normalizedSlug = String(slug)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
   if (process.env.NEXT_PUBLIC_COMMERCE_API_URL) {
     try {
       const data = await fetchCommerceApi<unknown>(`/products?slug=${encodeURIComponent(slug)}`);
       const products = normalizeProducts(data);
-      return products.find((product) => product.slug === slug);
+      return products.find((product) => product.slug === normalizedSlug);
     } catch {
-      return FALLBACK_PRODUCTS.find((product) => product.slug === slug);
+      return FALLBACK_PRODUCTS.find((product) => product.slug === normalizedSlug);
     }
   }
 
-  return FALLBACK_PRODUCTS.find((product) => product.slug === slug);
+  return FALLBACK_PRODUCTS.find((product) => product.slug === normalizedSlug);
 }
