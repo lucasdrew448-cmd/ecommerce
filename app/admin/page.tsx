@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { listAdminOrders, listAdminProducts } from "@/lib/admin";
+import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 export const metadata = {
   title: "Admin Dashboard",
@@ -8,6 +10,9 @@ export const metadata = {
 
 export default async function AdminDashboardPage() {
   const requestHeaders = headers();
+  if (!verifyAdminTokenFromHeaders(requestHeaders)) {
+    redirect("/admin/login");
+  }
   const [products, orders] = await Promise.all([listAdminProducts(requestHeaders), listAdminOrders(requestHeaders)]);
 
   return (

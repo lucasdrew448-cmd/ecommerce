@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { listAdminProducts } from "@/lib/admin";
+import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 import AdminProductsClient from "@/components/AdminProductsClient";
 
 export const metadata = {
@@ -8,6 +10,9 @@ export const metadata = {
 
 export default async function AdminProductsPage() {
   const requestHeaders = headers();
+  if (!verifyAdminTokenFromHeaders(requestHeaders)) {
+    redirect("/admin/login");
+  }
   const products = await listAdminProducts(requestHeaders);
 
   return (

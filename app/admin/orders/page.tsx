@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { listAdminOrders } from "@/lib/admin";
+import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 export const metadata = {
   title: "Admin Orders",
@@ -7,6 +9,9 @@ export const metadata = {
 
 export default async function AdminOrdersPage() {
   const requestHeaders = headers();
+  if (!verifyAdminTokenFromHeaders(requestHeaders)) {
+    redirect("/admin/login");
+  }
   const orders = await listAdminOrders(requestHeaders);
 
   return (
