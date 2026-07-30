@@ -7,7 +7,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const payload = await request.json();
-  const product = await createAdminProduct(payload);
-  return NextResponse.json(product, { status: 201 });
+  try {
+    const payload = await request.json();
+    const product = await createAdminProduct(payload);
+    return NextResponse.json(product, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to create product." },
+      { status: 500 }
+    );
+  }
 }

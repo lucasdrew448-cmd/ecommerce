@@ -72,21 +72,26 @@ export default function AdminProductsClient({ initialProducts }: AdminProductsCl
     const endpoint = form.id ? `/api/admin/products/${form.id}` : "/api/admin/products";
     const method = form.id ? "PUT" : "POST";
 
-    const response = await fetch(endpoint, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    const data = await response.json();
-    if (!response.ok) {
-      setMessage(data.error || "Unable to save the product.");
-      return;
+      const data = await response.json();
+      if (!response.ok) {
+        setMessage(data.error || "Unable to save the product.");
+        return;
+      }
+
+      setMessage(form.id ? "Product updated." : "Product created.");
+      setForm(emptyForm());
+      await refreshProducts();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to save the product.";
+      setMessage(message);
     }
-
-    setMessage(form.id ? "Product updated." : "Product created.");
-    setForm(emptyForm());
-    await refreshProducts();
   };
 
   const startEditing = (product: Product) => {
