@@ -37,9 +37,14 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
     <div className="card">
       <p className="eyebrow">Ready to purchase</p>
       <p className="product-description">Add this item to a browser cart or integrate a headless cart API here.</p>
-      <button className="button" onClick={addToCart}>
-        {added ? "Added to cart" : "Add to cart"}
-      </button>
+      <div className="flex flex-col gap-3">
+        <button className="button" onClick={addToCart}>
+          {added ? "Added to cart" : "Add to cart"}
+        </button>
+        <button className="button border border-blue-600 bg-white text-blue-600 hover:bg-blue-50">
+          Reserve with fee
+        </button>
+      </div>
     </div>
   );
 }
