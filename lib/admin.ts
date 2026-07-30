@@ -214,7 +214,7 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHe
 
 export async function listAdminProducts(headers?: HeadersInit): Promise<Product[]> {
   try {
-    const data = await fetchCommerceApi<unknown>("/products", undefined, headers);
+    const data = await fetchCommerceApi<unknown>("/next-api/products", undefined, headers);
     const products = normalizeProducts(data);
     adminProductStore = products;
     return products;
@@ -226,7 +226,7 @@ export async function listAdminProducts(headers?: HeadersInit): Promise<Product[
 export async function createAdminProduct(input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const product = toProduct(input);
 
-  const data = await fetchCommerceApi<unknown>("/products", {
+  const data = await fetchCommerceApi<unknown>("/next-api/products", {
     method: "POST",
     body: JSON.stringify(product),
   }, headers);
@@ -239,7 +239,7 @@ export async function updateAdminProduct(id: string, input: AdminProductInput, h
   const existingProduct = adminProductStore.find((product) => product.id === id || product.slug === id);
   const product = toProduct(input, existingProduct);
 
-  const data = await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
+  const data = await fetchCommerceApi<unknown>(`/next-api/products/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify(product),
   }, headers);
@@ -249,7 +249,7 @@ export async function updateAdminProduct(id: string, input: AdminProductInput, h
 }
 
 export async function deleteAdminProduct(id: string, headers?: HeadersInit): Promise<void> {
-  await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
+  await fetchCommerceApi<unknown>(`/next-api/products/${encodeURIComponent(id)}`, {
     method: "DELETE",
   }, headers);
 
@@ -258,7 +258,7 @@ export async function deleteAdminProduct(id: string, headers?: HeadersInit): Pro
 
 export async function listAdminOrders(headers?: HeadersInit): Promise<AdminOrder[]> {
   try {
-    const data = await fetchCommerceApi<unknown>("/orders", undefined, headers);
+    const data = await fetchCommerceApi<unknown>("/next-api/orders", undefined, headers);
     const orders = normalizeOrders(data);
     adminOrderStore = orders;
     return orders;
