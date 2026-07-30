@@ -3,7 +3,7 @@ import crypto from "crypto";
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
 export const ADMIN_COOKIE_NAME = "headless_admin";
 
-const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "";
+const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://discus-web-app-2-0.onrender.com/next-api/external-admin/auth";
 
 function computeToken(secret: string) {
   return crypto.createHmac("sha256", ADMIN_SECRET).update(secret).digest("hex");
