@@ -20,10 +20,12 @@ export default async function StorePage() {
         {products.map((product) => {
           const details = Array.isArray(product.details) ? product.details : [];
           const price = Number.isFinite(product.price) ? product.price : 0;
+          const imageSrc = product.image || product.images?.[0];
+
           return (
             <article key={product.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              {product.image ? (
-                <img src={product.image} alt={product.name} className="product-image mb-4 w-full object-cover" />
+              {imageSrc ? (
+                <img src={imageSrc} alt={product.name} className="product-image mb-4 w-full object-cover" />
               ) : null}
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-slate-900">{product.name}</h2>
