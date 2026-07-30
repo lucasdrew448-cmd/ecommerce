@@ -7,7 +7,7 @@ declare const process: {
 };
 
 async function fetchCommerceApi<T>(path: string): Promise<T> {
-  const baseUrl = process.env.NEXT_PUBLIC_COMMERCE_API_URL=https://discus-web-app-2-0.onrender.com/next-api;
+  const baseUrl = process.env.NEXT_PUBLIC_COMMERCE_API_URL;
   if (!baseUrl) {
     throw new Error("Commerce API URL not configured.");
   }
