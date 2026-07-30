@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { listAdminOrders, listAdminProducts } from "@/lib/admin";
 
 export const metadata = {
@@ -6,7 +7,8 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const [products, orders] = await Promise.all([listAdminProducts(), listAdminOrders()]);
+  const requestHeaders = headers();
+  const [products, orders] = await Promise.all([listAdminProducts(requestHeaders), listAdminOrders(requestHeaders)]);
 
   return (
     <main>

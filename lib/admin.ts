@@ -155,7 +155,33 @@ function normalizeOrders(data: unknown): AdminOrder[] {
   return adminOrderStore;
 }
 
-async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T> {
+function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
+  const normalized: Record<string, string> = {};
+
+  if (!headers) {
+    return normalized;
+  }
+
+  if (headers instanceof Headers) {
+    headers.forEach((value, key) => {
+      normalized[key] = value;
+    });
+    return normalized;
+  }
+
+  if (Array.isArray(headers)) {
+    headers.forEach(([key, value]) => {
+      if (typeof value === "string") {
+        normalized[key] = value;
+      }
+    });
+    return normalized;
+  }
+
+  return Object.fromEntries(Object.entries(headers).filter(([, value]) => typeof value === "string")) as Record<string, string>;
+}
+
+async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHeaders?: HeadersInit): Promise<T> {
   const baseUrl = process.env.NEXT_PUBLIC_COMMERCE_API_URL;
   if (!baseUrl) {
     throw new Error("Commerce API URL not configured.");
@@ -166,7 +192,8 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T>
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
+      ...normalizeHeaders(init?.headers),
+      ...normalizeHeaders(forwardedHeaders),
     },
   });
 
@@ -177,9 +204,9 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T>
   return response.json() as Promise<T>;
 }
 
-export async function listAdminProducts(): Promise<Product[]> {
+export async function listAdminProducts(headers?: HeadersInit): Promise<Product[]> {
   try {
-    const data = await fetchCommerceApi<unknown>("/products");
+    const data = await fetchCommerceApi<unknown>("/products", undefined, headers);
     const products = normalizeProducts(data);
     adminProductStore = products;
     return products;
@@ -188,7 +215,7 @@ export async function listAdminProducts(): Promise<Product[]> {
   }
 }
 
-export async function createAdminProduct(input: AdminProductInput): Promise<Product> {
+export async function createAdminProduct(input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const product = toProduct(input);
 
   try {
@@ -205,7 +232,7 @@ export async function createAdminProduct(input: AdminProductInput): Promise<Prod
   }
 }
 
-export async function updateAdminProduct(id: string, input: AdminProductInput): Promise<Product> {
+export async function updateAdminProduct(id: string, input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const existingProduct = adminProductStore.find((product) => product.id === id || product.slug === id);
   const product = toProduct(input, existingProduct);
 
@@ -213,7 +240,7 @@ export async function updateAdminProduct(id: string, input: AdminProductInput): 
     const data = await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
       method: "PUT",
       body: JSON.stringify(product),
-    });
+    }, headers);
     const normalizedProduct = normalizeProduct(data);
     adminProductStore = adminProductStore.map((item) => (item.id === id || item.slug === id ? normalizedProduct : item));
     return normalizedProduct;
@@ -223,11 +250,11 @@ export async function updateAdminProduct(id: string, input: AdminProductInput): 
   }
 }
 
-export async function deleteAdminProduct(id: string): Promise<void> {
+export async function deleteAdminProduct(id: string, headers?: HeadersInit): Promise<void> {
   try {
     await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`, {
       method: "DELETE",
-    });
+    }, headers);
   } catch {
     // fall back to local store updates if the external API is unavailable
   }
@@ -235,9 +262,9 @@ export async function deleteAdminProduct(id: string): Promise<void> {
   adminProductStore = adminProductStore.filter((product) => product.id !== id && product.slug !== id);
 }
 
-export async function listAdminOrders(): Promise<AdminOrder[]> {
+export async function listAdminOrders(headers?: HeadersInit): Promise<AdminOrder[]> {
   try {
-    const data = await fetchCommerceApi<unknown>("/orders");
+    const data = await fetchCommerceApi<unknown>("/orders", undefined, headers);
     const orders = normalizeOrders(data);
     adminOrderStore = orders;
     return orders;

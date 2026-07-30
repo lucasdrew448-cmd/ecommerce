@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { listAdminOrders } from "@/lib/admin";
 
 export const metadata = {
@@ -5,7 +6,8 @@ export const metadata = {
 };
 
 export default async function AdminOrdersPage() {
-  const orders = await listAdminOrders();
+  const requestHeaders = headers();
+  const orders = await listAdminOrders(requestHeaders);
 
   return (
     <main>

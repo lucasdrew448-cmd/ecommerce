@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { listAdminProducts } from "@/lib/admin";
 import AdminProductsClient from "@/components/AdminProductsClient";
 
@@ -6,7 +7,8 @@ export const metadata = {
 };
 
 export default async function AdminProductsPage() {
-  const products = await listAdminProducts();
+  const requestHeaders = headers();
+  const products = await listAdminProducts(requestHeaders);
 
   return (
     <main>
