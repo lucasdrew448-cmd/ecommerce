@@ -23,10 +23,23 @@ async function fetchCommerceApi<T>(path: string): Promise<T> {
   return response.json();
 }
 
+function normalizeProducts(data: unknown): Product[] {
+  if (Array.isArray(data)) {
+    return data as Product[];
+  }
+
+  if (data && typeof data === "object" && Array.isArray((data as any).products)) {
+    return (data as any).products as Product[];
+  }
+
+  return FALLBACK_PRODUCTS;
+}
+
 export async function getProducts(): Promise<Product[]> {
   if (process.env.NEXT_PUBLIC_COMMERCE_API_URL) {
     try {
-      return await fetchCommerceApi<Product[]>("/products");
+      const data = await fetchCommerceApi<unknown>("/products");
+      return normalizeProducts(data);
     } catch {
       return FALLBACK_PRODUCTS;
     }
@@ -38,7 +51,8 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
   if (process.env.NEXT_PUBLIC_COMMERCE_API_URL) {
     try {
-      const products = await fetchCommerceApi<Product[]>("/products");
+      const data = await fetchCommerceApi<unknown>(`/products?slug=${encodeURIComponent(slug)}`);
+      const products = normalizeProducts(data);
       return products.find((product) => product.slug === slug);
     } catch {
       return FALLBACK_PRODUCTS.find((product) => product.slug === slug);
