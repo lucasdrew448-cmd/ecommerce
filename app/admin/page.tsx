@@ -19,8 +19,15 @@ export default async function AdminDashboardPage() {
     <main>
       <section className="section">
         <div className="section-header">
-          <h1>Admin dashboard</h1>
-          <p>Create, edit, and remove catalog products while reviewing recent orders from your commerce API.</p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h1>Admin dashboard</h1>
+              <p>Create, edit, and remove catalog products while reviewing recent orders from your commerce API.</p>
+            </div>
+            <Link href="/admin/logout" className="rounded-full border border-slate-300 px-4 py-2 font-semibold text-slate-700">
+              Logout
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
