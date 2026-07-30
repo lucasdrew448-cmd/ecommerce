@@ -29,6 +29,7 @@ function writeCart(items: CartItem[]) {
   }
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  window.dispatchEvent(new Event("cart-updated"));
 }
 
 export default function CartClient() {
