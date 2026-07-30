@@ -42,36 +42,42 @@ function normalizeProduct(item: unknown): Product {
         ? product.imageUrl
         : undefined,
     images: (() => {
+      const mainImage =
+        typeof product.image === "string"
+          ? product.image
+          : typeof product.image_url === "string"
+          ? product.image_url
+          : typeof product.imageUrl === "string"
+          ? product.imageUrl
+          : undefined;
+
       const directImages = Array.isArray(product.images)
         ? (product.images as unknown[]).filter((value): value is string => typeof value === "string")
         : [];
 
-      if (directImages.length) {
-        return directImages;
-      }
+      const additionalImagesValue = product.additional_images;
+      const additionalImages = Array.isArray(additionalImagesValue)
+        ? additionalImagesValue.filter((value): value is string => typeof value === "string")
+        : typeof additionalImagesValue === "string"
+        ? [additionalImagesValue]
+        : additionalImagesValue && typeof additionalImagesValue === "object"
+        ? (() => {
+            const nested = additionalImagesValue as Record<string, unknown>;
+            if (Array.isArray(nested.images)) {
+              return nested.images.filter((value): value is string => typeof value === "string");
+            }
+            if (typeof nested.url === "string") {
+              return [nested.url];
+            }
+            return [];
+          })()
+        : [];
 
-      const additionalImages = product.additional_images;
-      if (Array.isArray(additionalImages)) {
-        return additionalImages.filter((value): value is string => typeof value === "string");
-      }
+      const orderedImages = [mainImage, ...directImages, ...additionalImages].filter(
+        (value): value is string => typeof value === "string" && value.length > 0
+      );
 
-      if (typeof additionalImages === "string") {
-        return [additionalImages];
-      }
-
-      if (additionalImages && typeof additionalImages === "object") {
-        if (Array.isArray((additionalImages as Record<string, unknown>).images)) {
-          return ((additionalImages as Record<string, unknown>).images as unknown[]).filter(
-            (value): value is string => typeof value === "string"
-          );
-        }
-
-        if (typeof (additionalImages as Record<string, unknown>).url === "string") {
-          return [(additionalImages as Record<string, unknown>).url as string];
-        }
-      }
-
-      return undefined;
+      return orderedImages.length ? orderedImages : undefined;
     })(),
     details: Array.isArray(product.details)
       ? (product.details as unknown[]).filter((value): value is string => typeof value === "string")
