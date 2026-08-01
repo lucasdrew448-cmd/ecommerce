@@ -17,6 +17,7 @@ export default function AdminRegisterPage() {
 
     const response = await fetch("/api/admin/register", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, fullName }),
     });

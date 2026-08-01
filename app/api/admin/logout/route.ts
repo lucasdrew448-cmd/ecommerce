@@ -1,14 +1,8 @@
 import { NextResponse } from "next/server";
-import { clearAdminCookie } from "@/lib/auth";
+import { clearAdminCookieOnResponse } from "@/lib/auth";
 
-export async function POST() {
-  return NextResponse.json(
-    { success: true },
-    {
-      status: 200,
-      headers: {
-        "Set-Cookie": clearAdminCookie(),
-      },
-    }
-  );
+export async function GET(request: Request) {
+  const response = NextResponse.redirect(new URL("/admin/login", request.url));
+  clearAdminCookieOnResponse(response);
+  return response;
 }

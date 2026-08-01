@@ -130,10 +130,36 @@ function buildCookieValue(value: string, maxAgeSeconds: number) {
   return `${ADMIN_COOKIE_NAME}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
 }
 
+export const ADMIN_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+
 export function createAdminCookie(): string {
-  return buildCookieValue(getAdminToken(), 60 * 60 * 24 * 7);
+  return buildCookieValue(getAdminToken(), ADMIN_COOKIE_MAX_AGE);
+}
+
+export function setAdminCookieOnResponse(response: { cookies: { set: (cookie: Record<string, unknown>) => void } }) {
+  response.cookies.set({
+    name: ADMIN_COOKIE_NAME,
+    value: getAdminToken(),
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 export function clearAdminCookie(): string {
   return `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
+}
+
+export function clearAdminCookieOnResponse(response: { cookies: { set: (cookie: Record<string, unknown>) => void } }) {
+  response.cookies.set({
+    name: ADMIN_COOKIE_NAME,
+    value: "",
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 0,
+    secure: process.env.NODE_ENV === "production",
+  });
 }

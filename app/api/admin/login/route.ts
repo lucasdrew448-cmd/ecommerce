@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminCookie, loginAdmin } from "@/lib/auth";
+import { loginAdmin, setAdminCookieOnResponse } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -12,15 +12,9 @@ export async function POST(request: Request) {
 
     await loginAdmin(email, password);
 
-    return NextResponse.json(
-      { success: true },
-      {
-        status: 200,
-        headers: {
-          "Set-Cookie": createAdminCookie(),
-        },
-      }
-    );
+    const response = NextResponse.json({ success: true }, { status: 200 });
+    setAdminCookieOnResponse(response);
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to authenticate." },

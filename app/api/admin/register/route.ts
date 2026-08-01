@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminCookie, registerAdmin } from "@/lib/auth";
+import { registerAdmin, setAdminCookieOnResponse } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -11,15 +11,9 @@ export async function POST(request: Request) {
     }
 
     const result = await registerAdmin(email, password, fullName);
-    return NextResponse.json(
-      { success: true, result },
-      {
-        status: 201,
-        headers: {
-          "Set-Cookie": createAdminCookie(),
-        },
-      }
-    );
+    const response = NextResponse.json({ success: true, result }, { status: 201 });
+    setAdminCookieOnResponse(response);
+    return response;
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to register admin." },
