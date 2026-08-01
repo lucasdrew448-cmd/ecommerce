@@ -1,3 +1,5 @@
+import type { NextResponse } from "next/server";
+
 declare function require(moduleName: string): any;
 declare const process: {
   env: Record<string, string | undefined>;
@@ -136,7 +138,7 @@ export function createAdminCookie(): string {
   return buildCookieValue(getAdminToken(), ADMIN_COOKIE_MAX_AGE);
 }
 
-export function setAdminCookieOnResponse(response: { cookies: { set: (cookie: Record<string, unknown>) => void } }) {
+export function setAdminCookieOnResponse(response: NextResponse) {
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: getAdminToken(),
@@ -152,7 +154,7 @@ export function clearAdminCookie(): string {
   return `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
-export function clearAdminCookieOnResponse(response: { cookies: { set: (cookie: Record<string, unknown>) => void } }) {
+export function clearAdminCookieOnResponse(response: NextResponse) {
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: "",
