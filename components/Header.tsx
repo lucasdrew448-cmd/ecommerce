@@ -35,7 +35,7 @@ export default function Header() {
     <header className="site-header">
       <div className="header-inner">
         <div className="brand">
-          <Link href="/">Headless Store</Link>
+          <Link href="/">🐟 Discus Fish Store</Link>
         </div>
 
         <div className="header-actions">

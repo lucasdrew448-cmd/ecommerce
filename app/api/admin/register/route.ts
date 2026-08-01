@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { registerAdmin, setAdminCookieOnResponse } from "@/lib/auth";
+import { registerAdmin, setAdminCookieOnResponse, extractTokenFromAuthResponse } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -11,8 +11,14 @@ export async function POST(request: Request) {
     }
 
     const result = await registerAdmin(email, password, fullName);
+    const token = extractTokenFromAuthResponse(result);
+
+    if (!token) {
+      return NextResponse.json({ error: "Registration succeeded but no token was returned." }, { status: 502 });
+    }
+
     const response = NextResponse.json({ success: true, result }, { status: 201 });
-    setAdminCookieOnResponse(response);
+    setAdminCookieOnResponse(response, token);
     return response;
   } catch (error) {
     return NextResponse.json(

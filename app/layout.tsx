@@ -4,8 +4,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Headless Ecommerce Store",
-  description: "A Next.js headless ecommerce storefront built for composable APIs.",
+  title: {
+    default: "Discus Fish Store — Premium Discus Fish",
+    template: "%s | Discus Fish Store",
+  },
+  description: "Premium discus fish for sale. Healthy, hand-picked discus fish with expert support and safe shipping.",
+  keywords: ["discus fish", "discus fish for sale", "premium discus", "aquarium fish", "freshwater fish"],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

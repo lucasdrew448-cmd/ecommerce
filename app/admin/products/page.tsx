@@ -1,8 +1,10 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { listAdminProducts } from "@/lib/admin";
+import { listAdminProducts, listCategories, listProductTypes, listSuppliers } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 import AdminProductsClient from "@/components/AdminProductsClient";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Admin Products",
@@ -13,7 +15,13 @@ export default async function AdminProductsPage() {
   if (!verifyAdminTokenFromHeaders(requestHeaders)) {
     redirect("/admin/login");
   }
-  const products = await listAdminProducts(requestHeaders);
+
+  const [products, categories, productTypes, suppliers] = await Promise.all([
+    listAdminProducts(requestHeaders),
+    listCategories(requestHeaders),
+    listProductTypes(requestHeaders),
+    listSuppliers(requestHeaders),
+  ]);
 
   return (
     <main>
@@ -22,7 +30,12 @@ export default async function AdminProductsPage() {
           <h1>Product management</h1>
           <p>Manage catalog items from the external commerce API directly inside the storefront.</p>
         </div>
-        <AdminProductsClient initialProducts={products} />
+        <AdminProductsClient
+          initialProducts={products}
+          categories={categories}
+          productTypes={productTypes}
+          suppliers={suppliers}
+        />
       </section>
     </main>
   );
