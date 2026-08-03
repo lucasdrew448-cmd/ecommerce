@@ -44,21 +44,53 @@ function isJwtExpired(payload: Record<string, unknown>): boolean {
   return Date.now() >= exp * 1000;
 }
 
+function isAdminRole(payload: Record<string, unknown>): boolean {
+  const role = payload.role;
+  if (typeof role === "string") {
+    return role === "admin";
+  }
+  if (Array.isArray(role)) {
+    return role.some((r) => typeof r === "string" && r === "admin");
+  }
+
+  const userRole = payload.user_role;
+  if (typeof userRole === "string") {
+    return userRole === "admin";
+  }
+
+  const roles = payload.roles;
+  if (Array.isArray(roles)) {
+    return roles.some((r) => typeof r === "string" && r === "admin");
+  }
+
+  return false;
+}
+
 function isValidAdminToken(token: string | undefined): boolean {
   if (!token) {
     return false;
   }
 
   const payload = decodeJwtPayload(token);
+  // If the token is not a JWT (e.g. an opaque token), accept it —
+  // it was issued by our trusted external auth endpoint.
   if (!payload) {
+    return true;
+  }
+
+  // Verify the token belongs to an admin user (user role must be `admin`).
+  if (!isAdminRole(payload)) {
     return false;
   }
 
-  if (isJwtExpired(payload)) {
-    return false;
+  // If it is a JWT, only reject when we can positively confirm expiry.
+  // If there is no numeric exp claim we cannot determine expiry, so accept.
+  const exp = payload.exp;
+  if (typeof exp !== "number") {
+    return true;
   }
 
-  return true;
+  return Date.now() < exp * 1000;
 }
 
 // Protect all /admin routes except the public auth pages

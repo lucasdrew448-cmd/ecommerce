@@ -13,9 +13,16 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const payload = await request.json();
-  const product = await updateAdminProduct(params.id, payload, request.headers);
-  return NextResponse.json(product);
+  try {
+    const payload = await request.json();
+    const product = await updateAdminProduct(params.id, payload, request.headers);
+    return NextResponse.json(product);
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unable to update product." },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(request: Request, { params }: RouteParams) {
@@ -25,7 +32,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
   try {
     await deleteAdminProduct(params.id, request.headers);
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: "Product deleted successfully" });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to delete product." },

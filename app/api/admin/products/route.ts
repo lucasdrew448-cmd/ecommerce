@@ -18,6 +18,15 @@ export async function POST(request: Request) {
 
   try {
     const payload = await request.json();
+
+    if (typeof payload?.name !== "string" || !payload.name.trim()) {
+      return NextResponse.json({ error: "Product name is required." }, { status: 400 });
+    }
+
+    if (payload.price === undefined || (typeof payload.price !== "number" && isNaN(Number(payload.price)))) {
+      return NextResponse.json({ error: "Product price is required." }, { status: 400 });
+    }
+
     const product = await createAdminProduct(payload, request.headers);
     return NextResponse.json(product, { status: 201 });
   } catch (error) {

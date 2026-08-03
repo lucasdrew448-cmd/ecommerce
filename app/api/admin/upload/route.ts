@@ -17,11 +17,12 @@ export async function POST(request: Request) {
 
     const result = await uploadImage(formData, request.headers);
     if (!result.success) {
-      return NextResponse.json({ error: "Upload failed." }, { status: 500 });
+      return NextResponse.json({ error: "Upload failed." }, { status: 502 });
     }
 
     return NextResponse.json(result);
   } catch (error) {
+    console.error("[/api/admin/upload] image upload failed:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to upload image." },
       { status: 500 }

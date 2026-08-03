@@ -477,25 +477,6 @@ export async function getOrderById(id: string): Promise<Order | undefined> {
   }
 }
 
-export async function resendOrderConfirmation(orderId: string): Promise<{ success: boolean; message: string; messageId: string }> {
-  const data = await fetchCommerceApi<unknown>(`/orders/${encodeURIComponent(orderId)}/resend-confirmation`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
-
-  if (data && typeof data === "object") {
-    const objectData = data as Record<string, unknown>;
-    return {
-      success: objectData.success === true,
-      message: typeof objectData.message === "string" ? objectData.message : "Confirmation email resent successfully",
-      messageId: typeof objectData.messageId === "string" ? objectData.messageId : "",
-    };
-  }
-
-  return { success: true, message: "Confirmation email resent successfully", messageId: "" };
-}
-
 export async function getHealth(): Promise<{ status: string; timestamp: string }> {
   try {
     const data = await fetchCommerceApi<unknown>("/health");

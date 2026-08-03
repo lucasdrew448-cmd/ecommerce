@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,7 +25,10 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.push("/admin");
+    // Use a full page reload so the browser sends the newly-set auth cookie
+    // to the server-rendered /admin route. A client-side router.push can
+    // race with cookie persistence and leave the dashboard unauthenticated.
+    window.location.href = "/admin";
   };
 
   return (

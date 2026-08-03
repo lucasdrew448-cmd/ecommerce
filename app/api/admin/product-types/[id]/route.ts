@@ -45,7 +45,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
   try {
     await deleteProductType(params.id, request.headers);
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ message: "Product type deleted successfully" });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unable to delete product type." },

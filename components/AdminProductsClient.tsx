@@ -3,37 +3,45 @@
 import { useState } from "react";
 import type { Product } from "@/lib/types";
 
+async function safeParseJson<T>(response: Response): Promise<T> {
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return {} as T;
+  }
+}
+
 type AdminFormState = {
-  id: string;
-  slug: string;
   name: string;
   description: string;
   price: string;
-  currency: string;
-  image: string;
-  publicId: string;
-  details: string;
+  stock: string;
   category_id: string;
   product_type_id: string;
   supplier_id: string;
-  stock: string;
+  image_url: string;
+  publicId: string;
+  additional_images: string[];
+  additional_public_ids: string[];
   sizes: string;
 };
 
 const emptyForm = (): AdminFormState => ({
-  id: "",
-  slug: "",
   name: "",
   description: "",
   price: "",
-  currency: "$",
-  image: "",
-  publicId: "",
-  details: "",
+  stock: "",
   category_id: "",
   product_type_id: "",
   supplier_id: "",
-  stock: "",
+  image_url: "",
+  publicId: "",
+  additional_images: [],
+  additional_public_ids: [],
   sizes: "",
 });
 
@@ -44,19 +52,37 @@ interface AdminProductsClientProps {
   suppliers?: { id: string; name: string }[];
 }
 
+async function uploadToCloudinary(file: File): Promise<{ url?: string; publicId?: string; error?: string }> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch("/api/admin/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await safeParseJson<{ url?: string; publicId?: string; error?: string }>(response);
+  if (!response.ok) {
+    throw new Error(data.error || "Upload failed.");
+  }
+
+  return data;
+}
+
 export default function AdminProductsClient({ initialProducts, categories = [], productTypes = [], suppliers = [] }: AdminProductsClientProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [form, setForm] = useState<AdminFormState>(emptyForm());
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const refreshProducts = async () => {
     const response = await fetch("/api/admin/products", { cache: "no-store" });
-    const data = await response.json();
-    setProducts(data as Product[]);
+    const data = await safeParseJson<Product[]>(response);
+    setProducts(Array.isArray(data) ? data : []);
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMainImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -66,23 +92,10 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
     setMessage("Uploading image to Cloudinary…");
 
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        setMessage(data.error || "Upload failed.");
-        return;
-      }
-
+      const data = await uploadToCloudinary(file);
       setForm((current) => ({
         ...current,
-        image: data.url || "",
+        image_url: data.url || "",
         publicId: data.publicId || "",
       }));
       setMessage(`Uploaded ${file.name}.`);
@@ -90,6 +103,48 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
       setMessage(error instanceof Error ? error.message : "Upload failed.");
     } finally {
       setUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleAdditionalImagesUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) {
+      return;
+    }
+
+    setUploading(true);
+    setMessage(`Uploading ${files.length} image${files.length > 1 ? "s" : ""} to Cloudinary…`);
+
+    try {
+      const uploadedUrls: string[] = [];
+      const uploadedPublicIds: string[] = [];
+
+      for (const file of files) {
+        const data = await uploadToCloudinary(file);
+        if (data.url) {
+          uploadedUrls.push(data.url);
+        }
+        if (data.publicId) {
+          uploadedPublicIds.push(data.publicId);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setForm((current) => ({
+          ...current,
+          additional_images: [...current.additional_images, ...uploadedUrls],
+          additional_public_ids: [...current.additional_public_ids, ...uploadedPublicIds],
+        }));
+        setMessage(`Uploaded ${uploadedUrls.length} image${uploadedUrls.length > 1 ? "s" : ""}.`);
+      } else {
+        setMessage("No images were uploaded.");
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
     }
   };
 
@@ -97,23 +152,20 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
     event.preventDefault();
 
     const payload = {
-      id: form.id || undefined,
-      slug: form.slug || undefined,
       name: form.name,
       description: form.description,
       price: Number(form.price || 0),
-      currency: form.currency,
-      image: form.image || undefined,
-      details: form.details.split("\n").map((item) => item.trim()).filter(Boolean),
+      stock: form.stock !== "" ? Number(form.stock) : undefined,
       category_id: form.category_id || undefined,
       product_type_id: form.product_type_id || undefined,
       supplier_id: form.supplier_id || undefined,
-      stock: form.stock !== "" ? Number(form.stock) : undefined,
+      image_url: form.image_url || undefined,
+      additional_images: form.additional_images.length > 0 ? form.additional_images : undefined,
       sizes: form.sizes ? form.sizes.split(",").map((item) => item.trim()).filter(Boolean) : undefined,
     };
 
-    const endpoint = form.id ? `/api/admin/products/${form.id}` : "/api/admin/products";
-    const method = form.id ? "PUT" : "POST";
+    const endpoint = editingId ? `/api/admin/products/${editingId}` : "/api/admin/products";
+    const method = editingId ? "PUT" : "POST";
 
     try {
       const response = await fetch(endpoint, {
@@ -122,14 +174,15 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = await safeParseJson<{ error?: string }>(response);
       if (!response.ok) {
         setMessage(data.error || "Unable to save the product.");
         return;
       }
 
-      setMessage(form.id ? "Product updated." : "Product created.");
+      setMessage(editingId ? "Product updated." : "Product created.");
       setForm(emptyForm());
+      setEditingId(null);
       await refreshProducts();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to save the product.";
@@ -143,7 +196,7 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
       try {
         const parsed = JSON.parse(product.sizes);
         if (Array.isArray(parsed)) {
-          sizes = parsed.join(", ");
+          sizes = parsed.map((item) => (typeof item === "string" ? item : typeof item === "object" && item !== null && typeof (item as { size?: unknown }).size === "string" ? (item as { size: string }).size : String(item))).join(", ");
         } else if (typeof parsed === "string") {
           sizes = parsed;
         }
@@ -152,22 +205,35 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
       }
     }
 
+    let additionalImages: string[] = [];
+    if (product.additional_images) {
+      try {
+        const parsed = JSON.parse(product.additional_images);
+        if (Array.isArray(parsed)) {
+          additionalImages = parsed.filter((item): item is string => typeof item === "string");
+        } else if (typeof parsed === "string") {
+          additionalImages = [parsed];
+        }
+      } catch {
+        additionalImages = [product.additional_images];
+      }
+    }
+
     setForm({
-      id: product.id,
-      slug: product.slug,
       name: product.name,
       description: product.description,
       price: String(product.price),
-      currency: product.currency,
-      image: product.image || "",
-      publicId: "",
-      details: product.details.join("\n"),
+      stock: product.stock !== undefined ? String(product.stock) : "",
       category_id: product.category_id || "",
       product_type_id: product.product_type_id || "",
       supplier_id: product.supplier_id || "",
-      stock: product.stock !== undefined ? String(product.stock) : "",
+      image_url: product.image_url || product.image || "",
+      publicId: "",
+      additional_images: additionalImages,
+      additional_public_ids: [],
       sizes,
     });
+    setEditingId(product.id);
     setMessage(`Editing ${product.name}.`);
   };
 
@@ -182,9 +248,17 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
       setMessage(`Deleted ${product.name}.`);
       await refreshProducts();
     } else {
-      const data = await response.json();
+      const data = await safeParseJson<{ error?: string }>(response);
       setMessage(data.error || "Unable to delete product.");
     }
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      additional_images: current.additional_images.filter((_, i) => i !== index),
+      additional_public_ids: current.additional_public_ids.filter((_, i) => i !== index),
+    }));
   };
 
   return (
@@ -202,15 +276,6 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
               required
               value={form.name}
               onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-              className="rounded-lg border border-slate-300 px-3 py-2"
-            />
-          </label>
-
-          <label className="grid gap-2">
-            <span>Slug</span>
-            <input
-              value={form.slug}
-              onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value }))}
               className="rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
@@ -241,17 +306,6 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
             </label>
 
             <label className="grid gap-2">
-              <span>Currency</span>
-              <input
-                value={form.currency}
-                onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </label>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-2">
               <span>Stock</span>
               <input
                 type="number"
@@ -259,15 +313,6 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
                 step="1"
                 value={form.stock}
                 onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </label>
-
-            <label className="grid gap-2">
-              <span>Sizes (comma separated)</span>
-              <input
-                value={form.sizes}
-                onChange={(event) => setForm((current) => ({ ...current, sizes: event.target.value }))}
                 className="rounded-lg border border-slate-300 px-3 py-2"
               />
             </label>
@@ -327,20 +372,20 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
             </label>
           ) : null}
 
-          <label className="grid gap-2">
-            <span>Upload image to Cloudinary</span>
+          <div className="grid gap-2">
+            <span>Main image</span>
             <input
               type="file"
               accept="image/*"
               disabled={uploading}
-              onChange={handleImageUpload}
+              onChange={handleMainImageUpload}
               className="rounded-lg border border-slate-300 px-3 py-2 file:mr-3 file:rounded-full file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-blue-700 disabled:opacity-50"
             />
-          </label>
+          </div>
 
-          {form.image ? (
+          {form.image_url ? (
             <div className="overflow-hidden rounded-xl border border-slate-200">
-              <img src={form.image} alt="Product image preview" className="h-48 w-full object-cover" />
+              <img src={form.image_url} alt="Product main image preview" className="h-48 w-full object-cover" />
             </div>
           ) : null}
 
@@ -348,12 +393,43 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
             <p className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-600">Cloudinary public ID: {form.publicId}</p>
           ) : null}
 
+          <div className="grid gap-2">
+            <span>Additional images (upload to Cloudinary)</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              disabled={uploading}
+              onChange={handleAdditionalImagesUpload}
+              className="rounded-lg border border-slate-300 px-3 py-2 file:mr-3 file:rounded-full file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-blue-700 disabled:opacity-50"
+            />
+          </div>
+
+          {form.additional_images.length > 0 ? (
+            <div className="grid gap-3">
+              <span className="text-sm font-semibold text-slate-700">Uploaded additional images ({form.additional_images.length})</span>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {form.additional_images.map((imageUrl, index) => (
+                  <div key={`${imageUrl}-${index}`} className="relative overflow-hidden rounded-xl border border-slate-200">
+                    <img src={imageUrl} alt={`Additional image ${index + 1}`} className="h-32 w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeAdditionalImage(index)}
+                      className="absolute right-2 top-2 rounded-full bg-rose-600 px-2 py-1 text-xs font-semibold text-white shadow"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <label className="grid gap-2">
-            <span>Details (one per line)</span>
-            <textarea
-              rows={4}
-              value={form.details}
-              onChange={(event) => setForm((current) => ({ ...current, details: event.target.value }))}
+            <span>Sizes (comma separated)</span>
+            <input
+              value={form.sizes}
+              onChange={(event) => setForm((current) => ({ ...current, sizes: event.target.value }))}
               className="rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
@@ -362,12 +438,13 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
 
           <div className="flex flex-wrap gap-3">
             <button type="submit" className="button">
-              {form.id ? "Save changes" : "Create product"}
+              {editingId ? "Save changes" : "Create product"}
             </button>
             <button
               type="button"
               onClick={() => {
                 setForm(emptyForm());
+                setEditingId(null);
                 setMessage(null);
               }}
               className="rounded-full border border-slate-300 px-4 py-2 font-semibold text-slate-700"
@@ -401,6 +478,16 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
                 <p className={`mt-2 text-xs font-semibold ${product.stock > 0 ? "text-emerald-700" : "text-rose-600"}`}>
                   {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
                 </p>
+              ) : null}
+              {product.additional_images ? (
+                <p className="mt-2 text-xs text-slate-500">{(() => {
+                  try {
+                    const parsed = JSON.parse(product.additional_images);
+                    return Array.isArray(parsed) ? `${parsed.length} additional image${parsed.length > 1 ? "s" : ""}` : "";
+                  } catch {
+                    return "Has additional images";
+                  }
+                })()}</p>
               ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" onClick={() => startEditing(product)} className="rounded-full border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">

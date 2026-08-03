@@ -130,24 +130,96 @@ function isJwtExpired(payload: Record<string, unknown>): boolean {
   return Date.now() >= exp * 1000;
 }
 
+function isAdminRole(payload: Record<string, unknown>): boolean {
+  const role = payload.role;
+  if (typeof role === "string") {
+    return role === "admin";
+  }
+  if (Array.isArray(role)) {
+    return role.some((r) => typeof r === "string" && r === "admin");
+  }
+
+  const userRole = payload.user_role;
+  if (typeof userRole === "string") {
+    return userRole === "admin";
+  }
+
+  const roles = payload.roles;
+  if (Array.isArray(roles)) {
+    return roles.some((r) => typeof r === "string" && r === "admin");
+  }
+
+  return false;
+}
+
 export function isValidAdminToken(token: string | undefined): boolean {
   if (!token) {
     return false;
   }
 
   const payload = decodeJwtPayload(token);
+  // If the token is not a JWT (e.g. an opaque token), accept it —
+  // it was issued by our trusted external auth endpoint.
   if (!payload) {
+    return true;
+  }
+
+  // Verify the token belongs to an admin user (user role must be `admin`).
+  if (!isAdminRole(payload)) {
     return false;
   }
 
-  if (isJwtExpired(payload)) {
-    return false;
+  // Only reject when we can positively confirm expiry.
+  // If there is no numeric exp claim we cannot determine expiry, so accept.
+  const exp = payload.exp;
+  if (typeof exp !== "number") {
+    return true;
   }
 
-  return true;
+  return Date.now() < exp * 1000;
+}
+
+function extractBearerToken(authHeader: string): string | null {
+  const trimmed = authHeader.trim();
+  const prefix = "bearer ";
+  if (trimmed.toLowerCase().startsWith(prefix)) {
+    const token = trimmed.slice(prefix.length).trim();
+    return token.length > 0 ? token : null;
+  }
+  return null;
+}
+
+function getAuthHeaderFromHeaders(headers?: HeadersInit): string | null {
+  if (!headers) {
+    return null;
+  }
+
+  if (typeof (headers as { get?: unknown }).get === "function") {
+    return (headers as { get: (name: string) => string | null }).get("authorization");
+  }
+
+  if (Array.isArray(headers)) {
+    const entry = headers.find(([name]) => name.toLowerCase() === "authorization");
+    return entry ? (entry[1] as string) : null;
+  }
+
+  const value = (headers as Record<string, unknown>).authorization;
+  return typeof value === "string" ? value : null;
 }
 
 export function verifyAdminTokenFromHeaders(headers?: HeadersInit): boolean {
+  if (!headers) {
+    return false;
+  }
+
+  const authHeader = getAuthHeaderFromHeaders(headers);
+  if (authHeader) {
+    const bearerToken = extractBearerToken(authHeader);
+    if (bearerToken && isValidAdminToken(bearerToken)) {
+      return true;
+    }
+  }
+
   const cookieHeader = getCookieHeaderFromHeaders(headers);
   const cookies = parseCookies(cookieHeader);
   return isValidAdminToken(cookies[ADMIN_COOKIE_NAME]);

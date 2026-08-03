@@ -1,5 +1,6 @@
 import type { Category, HeroBanner, Order, Product, ProductType, Review, Supplier, UploadResult } from "@/lib/types";
 import { FALLBACK_PRODUCTS } from "@/lib/products";
+import { ADMIN_COOKIE_NAME, parseCookies } from "@/lib/auth";
 
 declare const process: {
   env: Record<string, string | undefined>;
@@ -8,19 +9,20 @@ declare const process: {
 export type AdminProductInput = {
   id?: string;
   slug?: string;
-  name: string;
-  description: string;
-  price: number;
+  name?: string;
+  description?: string;
+  price?: number;
   currency?: string;
   image?: string;
+  image_url?: string;
   images?: string[];
   details?: string[];
   category_id?: string;
   product_type_id?: string;
   supplier_id?: string;
   stock?: number;
-  additional_images?: string[];
-  sizes?: string[];
+  additional_images?: string[] | string;
+  sizes?: string[] | string | Array<{ size: string; price?: number }>;
 };
 
 export type AdminOrder = {
@@ -97,6 +99,34 @@ function parseJsonArray(value: string): unknown {
   }
 }
 
+/**
+ * Normalizes a value that may be a JSON array, a pre-encoded JSON string,
+ * or an array of objects (e.g. sizes with prices) into a canonical JSON
+ * string. This lets callers pass either format straight through from a
+ * GET response without double-encoding.
+ */
+function normalizeToJsonString(value: unknown): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === "string") {
+    // Already a string — try to parse it so we can re-stringify for
+    // canonical formatting. If it isn't valid JSON, keep the raw string.
+    const parsed = parseJsonArray(value);
+    if (Array.isArray(parsed) || (parsed && typeof parsed === "object")) {
+      return JSON.stringify(parsed);
+    }
+    return value;
+  }
+
+  if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
+    return JSON.stringify(value);
+  }
+
+  return undefined;
+}
+
 function normalizeImageArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value
@@ -130,34 +160,43 @@ function normalizeImageArray(value: unknown): string[] {
 }
 
 function toProduct(input: AdminProductInput, existing?: Product): Product {
-  const slug = input.slug || existing?.slug || createSlug(input.name);
+  const productName = input.name || existing?.name || "Untitled Product";
+  const slug = input.slug || existing?.slug || createSlug(productName);
   const id = input.id || existing?.id || `prod_${Date.now()}`;
 
   const mainImage =
     input.image ||
+    input.image_url ||
     existing?.image ||
     (typeof input.images?.[0] === "string" ? input.images[0] : undefined);
 
-  const allImages = [mainImage, ...(input.images ?? []), ...(input.additional_images ?? [])].filter(
+  // Normalize additional_images (which may be a JSON string or array)
+  // into a flat string array before spreading, so we don't accidentally
+  // spread individual characters of a JSON-encoded string.
+  const additionalImagesArray =
+    input.additional_images !== undefined ? normalizeImageArray(input.additional_images) : [];
+
+  const allImages = [mainImage, ...(input.images ?? []), ...additionalImagesArray].filter(
     (value): value is string => typeof value === "string" && value.length > 0
   );
 
   return {
     id,
     slug,
-    name: input.name,
-    description: input.description,
-    price: Number.isFinite(input.price) ? input.price : 0,
+    name: productName,
+    description: input.description || existing?.description || "",
+    price: typeof input.price === "number" && Number.isFinite(input.price) ? input.price : (existing?.price ?? 0),
     currency: input.currency || existing?.currency || "$",
     image: mainImage,
+    image_url: input.image_url || input.image || existing?.image_url || existing?.image,
     images: allImages.length ? allImages : existing?.images,
     details: input.details || existing?.details || [],
     category_id: input.category_id || existing?.category_id,
     product_type_id: input.product_type_id || existing?.product_type_id,
     supplier_id: input.supplier_id || existing?.supplier_id,
     stock: input.stock ?? existing?.stock,
-    additional_images: input.additional_images ? JSON.stringify(input.additional_images) : existing?.additional_images,
-    sizes: input.sizes ? JSON.stringify(input.sizes) : existing?.sizes,
+    additional_images: input.additional_images !== undefined ? normalizeToJsonString(input.additional_images) : existing?.additional_images,
+    sizes: input.sizes !== undefined ? normalizeToJsonString(input.sizes) : existing?.sizes,
   };
 }
 
@@ -189,6 +228,7 @@ function normalizeProduct(item: unknown): Product {
     price: Number.isFinite(price) ? price : 0,
     currency: typeof product.currency === "string" ? product.currency : "$",
     image: mainImage,
+    image_url: typeof product.image_url === "string" ? product.image_url : mainImage,
     images: orderedImages.length ? orderedImages : undefined,
     details: Array.isArray(product.details)
       ? (product.details as unknown[]).filter((value): value is string => typeof value === "string")
@@ -197,8 +237,8 @@ function normalizeProduct(item: unknown): Product {
     product_type_id: typeof product.product_type_id === "string" ? product.product_type_id : undefined,
     supplier_id: typeof product.supplier_id === "string" ? product.supplier_id : undefined,
     stock: typeof product.stock === "number" ? product.stock : undefined,
-    additional_images: typeof product.additional_images === "string" ? product.additional_images : undefined,
-    sizes: typeof product.sizes === "string" ? product.sizes : undefined,
+    additional_images: normalizeToJsonString(product.additional_images),
+    sizes: normalizeToJsonString(product.sizes),
     created_at: typeof product.created_at === "string" ? product.created_at : undefined,
     updated_at: typeof product.updated_at === "string" ? product.updated_at : undefined,
   };
@@ -376,6 +416,34 @@ function normalizeArray<T>(data: unknown, mapper: (item: unknown) => T): T[] {
   return [];
 }
 
+// Headers that must never be forwarded from the original request to the
+// upstream API. Forwarding these can break the upstream request:
+// - content-length / content-type are re-generated for the new body
+// - host points at our own server, not the upstream host
+// - connection / keep-alive manage our connection, not the upstream one
+// - accept-encoding may cause undici/upstream decompression mismatches
+// - accept / accept-language are irrelevant and can cause upstream issues
+const BLOCKED_HEADERS = new Set([
+  "content-length",
+  "content-type",
+  "host",
+  "connection",
+  "keep-alive",
+  "accept",
+  "accept-encoding",
+  "accept-language",
+  "referer",
+  "origin",
+  "user-agent",
+  "x-forwarded-for",
+  "x-forwarded-host",
+  "x-forwarded-port",
+  "x-forwarded-proto",
+  "x-real-ip",
+  "upgrade",
+  "transfer-encoding",
+]);
+
 function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   const normalized: Record<string, string> = {};
 
@@ -383,14 +451,9 @@ function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
     return normalized;
   }
 
-  if (typeof (headers as { forEach?: unknown }).forEach === "function") {
-    (headers as { forEach: (callback: (value: string, key: string) => void) => void }).forEach((value, key) => {
-      normalized[key] = value;
-    });
-    return normalized;
-  }
-
   if (typeof (headers as { get?: unknown }).get === "function") {
+    // Prefer the Headers API for extraction — only forward the auth-relevant
+    // headers (cookie + authorization), never the full header set.
     const cookieValue = (headers as { get: (name: string) => string | null }).get("cookie");
     if (cookieValue) {
       normalized.cookie = cookieValue;
@@ -399,19 +462,94 @@ function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
     if (authValue) {
       normalized.authorization = authValue;
     }
-    return normalized;
-  }
-
-  if (Array.isArray(headers)) {
+  } else if (Array.isArray(headers)) {
     headers.forEach(([key, value]) => {
-      if (typeof value === "string") {
+      if (typeof value === "string" && !BLOCKED_HEADERS.has(key.toLowerCase())) {
         normalized[key] = value;
       }
     });
-    return normalized;
+  } else {
+    const raw = headers as Record<string, unknown>;
+    if (typeof raw.forEach === "function") {
+      (raw as { forEach: (callback: (value: string, key: string) => void) => void }).forEach((value, key) => {
+        const lowerKey = key.toLowerCase();
+        if (!BLOCKED_HEADERS.has(lowerKey)) {
+          normalized[lowerKey] = value;
+        }
+      });
+    } else {
+      Object.entries(raw).forEach(([key, value]) => {
+        const lowerKey = key.toLowerCase();
+        if (typeof value === "string" && !BLOCKED_HEADERS.has(lowerKey)) {
+          normalized[lowerKey] = value;
+        }
+      });
+    }
   }
 
-  return Object.fromEntries(Object.entries(headers).filter(([, value]) => typeof value === "string")) as Record<string, string>;
+  // The upstream commerce API expects an Authorization: Bearer <token>
+  // header, but the admin token is stored in an HttpOnly cookie. Convert
+  // the cookie into a Bearer token so authenticated admin requests
+  // (create/update/delete) are authorized by the upstream API.
+  if (!normalized.authorization && normalized.cookie) {
+    const cookies = parseCookies(normalized.cookie);
+    const token = cookies[ADMIN_COOKIE_NAME];
+    if (token) {
+      normalized.authorization = `Bearer ${token}`;
+    }
+  }
+
+  return normalized;
+}
+
+function isRetryableFetchError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  // Handle AbortController timeout errors
+  if (error.name === "AbortError" || error.message.includes("aborted")) {
+    return true;
+  }
+
+  // Node's undici surfaces transient upstream connection resets (common
+  // with Render's free-tier cold starts) as "fetch failed" with a cause
+  // such as SocketError / UND_ERR_SOCKET. Retry these so the admin
+  // mutation succeeds once the upstream service finishes spinning up.
+  const cause = (error as { cause?: unknown }).cause;
+  const causeMessage = cause instanceof Error ? cause.message : "";
+  const causeCode = (cause as { code?: string }).code;
+
+  return (
+    error.message.includes("fetch failed") ||
+    error.message.includes("socket hang up") ||
+    error.message.includes("network") ||
+    causeMessage.includes("other side closed") ||
+    causeMessage.includes("ECONNRESET") ||
+    causeMessage.includes("ETIMEDOUT") ||
+    causeMessage.includes("socket hang up") ||
+    causeCode === "UND_ERR_SOCKET" ||
+    causeCode === "ECONNRESET" ||
+    causeCode === "ETIMEDOUT"
+  );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHeaders?: HeadersInit): Promise<T> {
@@ -426,36 +564,80 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHe
     ? `${normalizedBase}${normalizedPath.replace("/api", "")}`
     : `${normalizedBase}${normalizedPath}`;
 
-  const response = await fetch(url, {
-    cache: "no-store",
-    ...init,
-    headers: {
-      ...normalizeHeaders(init?.headers),
-      ...normalizeHeaders(forwardedHeaders),
-      ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
-    },
-  });
+  const isFormDataBody = typeof FormData !== "undefined" && init?.body instanceof FormData;
 
-  const rawText = await response.text();
-  let json: unknown = undefined;
+  const mergedHeaders: Record<string, string> = {
+    ...normalizeHeaders(init?.headers),
+    ...normalizeHeaders(forwardedHeaders),
+    ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
+  };
 
-  if (rawText) {
+  // When sending a FormData body, let the runtime set the correct
+  // multipart Content-Type (with a matching boundary). Forwarding the
+  // original request's content-type/content-length breaks multipart
+  // parsing on the upstream API because the boundary no longer matches
+  // the freshly serialized body.
+  if (isFormDataBody) {
+    delete mergedHeaders["content-type"];
+    delete mergedHeaders["Content-Type"];
+    delete mergedHeaders["content-length"];
+    delete mergedHeaders["Content-Length"];
+  }
+
+  // Render free-tier services can take 30-60+ seconds to cold start.
+  // Use a generous per-attempt timeout and exponential backoff between
+  // retries so the admin mutation succeeds once the service finishes
+  // spinning up.
+  const maxAttempts = 5;
+  const requestTimeoutMs = 30_000;
+  const backoffBaseMs = 3_000;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      json = JSON.parse(rawText);
-    } catch {
-      json = rawText;
+      const response = await fetchWithTimeout(url, {
+        cache: "no-store",
+        ...init,
+        headers: mergedHeaders,
+      }, requestTimeoutMs);
+
+      const rawText = await response.text();
+      let json: unknown = undefined;
+
+      if (rawText) {
+        try {
+          json = JSON.parse(rawText);
+        } catch {
+          json = rawText;
+        }
+      }
+
+      if (!response.ok) {
+        const message =
+          json && typeof json === "object" && "error" in json && typeof (json as Record<string, unknown>).error === "string"
+            ? (json as Record<string, unknown>).error as string
+            : `Request to ${path} failed (${response.status}).`;
+        throw new Error(message);
+      }
+
+      return json as T;
+    } catch (error) {
+      lastError = error;
+
+      // Retry transient socket/connection failures (Render cold starts),
+      // but rethrow immediately for non-retryable errors (e.g. 401/400).
+      if (attempt < maxAttempts && isRetryableFetchError(error)) {
+        const backoffMs = backoffBaseMs * attempt;
+        console.warn(`[fetchCommerceApi] ${path} attempt ${attempt}/${maxAttempts} failed, retrying in ${backoffMs}ms`, error instanceof Error ? error.message : error);
+        await delay(backoffMs);
+        continue;
+      }
+
+      throw error;
     }
   }
 
-  if (!response.ok) {
-    const message =
-      json && typeof json === "object" && "error" in json && typeof (json as Record<string, unknown>).error === "string"
-        ? (json as Record<string, unknown>).error as string
-        : `Request to ${path} failed (${response.status}).`;
-    throw new Error(message);
-  }
-
-  return json as T;
+  throw lastError instanceof Error ? lastError : new Error(`Request to ${path} failed after ${maxAttempts} attempts.`);
 }
 
 export async function listAdminProducts(headers?: HeadersInit): Promise<Product[]> {
@@ -469,12 +651,37 @@ export async function listAdminProducts(headers?: HeadersInit): Promise<Product[
   }
 }
 
+/**
+ * Builds the API-spec-compliant payload for create/update product requests.
+ * Only sends the fields the upstream /api/products endpoint expects:
+ * name, description, price, stock, category_id, product_type_id,
+ * supplier_id, image_url, additional_images, sizes.
+ */
+function toApiProductPayload(product: Product): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    name: product.name,
+    description: product.description,
+    price: product.price,
+  };
+
+  if (product.stock !== undefined) payload.stock = product.stock;
+  if (product.category_id) payload.category_id = product.category_id;
+  if (product.product_type_id) payload.product_type_id = product.product_type_id;
+  if (product.supplier_id) payload.supplier_id = product.supplier_id;
+  if (product.image_url) payload.image_url = product.image_url;
+  if (product.additional_images !== undefined) payload.additional_images = product.additional_images;
+  if (product.sizes !== undefined) payload.sizes = product.sizes;
+
+  return payload;
+}
+
 export async function createAdminProduct(input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const product = toProduct(input);
+  const payload = toApiProductPayload(product);
 
   const data = await fetchCommerceApi<unknown>("/api/products", {
     method: "POST",
-    body: JSON.stringify(product),
+    body: JSON.stringify(payload),
   }, headers);
   const normalizedProduct = normalizeProduct(data);
   adminProductStore = [normalizedProduct, ...adminProductStore.filter((item) => item.id !== normalizedProduct.id)];
@@ -484,10 +691,11 @@ export async function createAdminProduct(input: AdminProductInput, headers?: Hea
 export async function updateAdminProduct(id: string, input: AdminProductInput, headers?: HeadersInit): Promise<Product> {
   const existingProduct = adminProductStore.find((product) => product.id === id || product.slug === id);
   const product = toProduct(input, existingProduct);
+  const payload = toApiProductPayload(product);
 
   const data = await fetchCommerceApi<unknown>(`/api/products/${encodeURIComponent(id)}`, {
     method: "PUT",
-    body: JSON.stringify(product),
+    body: JSON.stringify(payload),
   }, headers);
   const normalizedProduct = normalizeProduct(data);
   adminProductStore = adminProductStore.map((item) => (item.id === id || item.slug === id ? normalizedProduct : item));

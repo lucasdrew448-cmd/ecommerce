@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrderById } from "@/lib/commerce";
-import ResendConfirmation from "@/components/ResendConfirmation";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +33,7 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
           </p>
           <h1>Thank you, {order.customer_name || "customer"}!</h1>
           <p className="mx-auto max-w-xl text-slate-600">
-            Your order has been placed successfully. A confirmation email has been sent to {order.customer_email || "your email"}.
+            Your order has been placed successfully.
           </p>
         </div>
 
@@ -82,7 +81,6 @@ export default async function OrderConfirmationPage({ params }: OrderConfirmatio
             <Link href="/store" className="rounded-full bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700">
               Continue shopping
             </Link>
-            <ResendConfirmation orderId={order.id} />
           </div>
         </div>
       </section>
