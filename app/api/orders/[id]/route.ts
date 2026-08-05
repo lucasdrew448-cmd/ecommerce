@@ -2,14 +2,15 @@ import { NextResponse } from "next/server";
 import { getOrderById } from "@/lib/commerce";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function GET(_request: Request, { params }: RouteParams) {
   try {
-    const order = await getOrderById(params.id);
+    const { id } = await params;
+    const order = await getOrderById(id);
     if (!order) {
       return NextResponse.json({ error: "Order not found." }, { status: 404 });
     }

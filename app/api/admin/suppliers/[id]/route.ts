@@ -3,9 +3,9 @@ import { deleteSupplier, updateSupplier } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
@@ -14,8 +14,9 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   try {
+    const { id } = await params;
     const payload = await request.json();
-    const supplier = await updateSupplier(params.id, payload ?? {}, request.headers);
+    const supplier = await updateSupplier(id, payload ?? {}, request.headers);
     return NextResponse.json(supplier);
   } catch (error) {
     return NextResponse.json(
@@ -31,7 +32,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   }
 
   try {
-    await deleteSupplier(params.id, request.headers);
+    const { id } = await params;
+    await deleteSupplier(id, request.headers);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(

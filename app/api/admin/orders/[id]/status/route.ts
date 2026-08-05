@@ -3,9 +3,9 @@ import { updateOrderStatus } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const VALID_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
@@ -16,6 +16,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   try {
+    const { id } = await params;
     const payload = await request.json();
     const { status } = payload ?? {};
 
@@ -26,7 +27,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       );
     }
 
-    const result = await updateOrderStatus(params.id, status, request.headers);
+    const result = await updateOrderStatus(id, status, request.headers);
     return NextResponse.json(result ?? { success: true, status });
   } catch (error) {
     return NextResponse.json(

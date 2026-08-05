@@ -121,7 +121,6 @@ function normalizeProduct(item: unknown): Product {
   const orderedImages = [mainImage, ...directImages, ...additionalImages].filter(
     (value): value is string => typeof value === "string" && value.length > 0
   );
-
   return {
     id: typeof product.id === "string" ? product.id : String(product.slug ?? name ?? "unknown"),
     slug: typeof product.slug === "string" ? product.slug : createSlug(name),

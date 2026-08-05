@@ -3,9 +3,9 @@ import { sendPaymentStatusEmail } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function POST(request: Request, { params }: RouteParams) {
@@ -14,6 +14,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   try {
+    const { id } = await params;
     const payload = await request.json();
     const { paymentStatus } = payload ?? {};
 
@@ -24,7 +25,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
-    const result = await sendPaymentStatusEmail(params.id, paymentStatus, request.headers);
+    const result = await sendPaymentStatusEmail(id, paymentStatus, request.headers);
     return NextResponse.json(result ?? { success: true });
   } catch (error) {
     return NextResponse.json(

@@ -3,9 +3,9 @@ import { deleteReview, updateReviewStatus } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
@@ -14,6 +14,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   try {
+    const { id } = await params;
     const payload = await request.json();
     const { status } = payload ?? {};
 
@@ -21,7 +22,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Invalid review status." }, { status: 400 });
     }
 
-    const review = await updateReviewStatus(params.id, status, request.headers);
+    const review = await updateReviewStatus(id, status, request.headers);
     return NextResponse.json(review);
   } catch (error) {
     return NextResponse.json(
@@ -37,7 +38,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   }
 
   try {
-    await deleteReview(params.id, request.headers);
+    const { id } = await params;
+    await deleteReview(id, request.headers);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(

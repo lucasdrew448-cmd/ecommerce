@@ -3,9 +3,9 @@ import { deleteCategory, updateCategory } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
@@ -14,6 +14,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   try {
+    const { id } = await params;
     const payload = await request.json();
     const { name, description } = payload ?? {};
 
@@ -22,7 +23,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     const category = await updateCategory(
-      params.id,
+      id,
       {
         name: name !== undefined ? name.trim() : undefined,
         description: description !== undefined ? description : undefined,
@@ -44,7 +45,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   }
 
   try {
-    await deleteCategory(params.id, request.headers);
+    const { id } = await params;
+    await deleteCategory(id, request.headers);
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error) {
     return NextResponse.json(

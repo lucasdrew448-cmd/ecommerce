@@ -8,15 +8,16 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 interface StorePageProps {
-  searchParams: {
+  searchParams: Promise<{
     category_id?: string;
     search?: string;
-  };
+  }>;
 }
 
 export default async function StorePage({ searchParams }: StorePageProps) {
-  const categoryId = searchParams.category_id ?? "";
-  const search = searchParams.search ?? "";
+  const params = await searchParams;
+  const categoryId = params.category_id ?? "";
+  const search = params.search ?? "";
 
   const [products, categories] = await Promise.all([
     getProducts({ category_id: categoryId || undefined, search: search || undefined }),

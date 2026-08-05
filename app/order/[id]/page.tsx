@@ -9,13 +9,14 @@ export const metadata = {
 };
 
 interface OrderConfirmationPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function OrderConfirmationPage({ params }: OrderConfirmationPageProps) {
-  const order = await getOrderById(params.id);
+  const { id } = await params;
+  const order = await getOrderById(id);
 
   if (!order) {
     notFound();

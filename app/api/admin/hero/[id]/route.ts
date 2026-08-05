@@ -3,9 +3,9 @@ import { deleteHeroBanner, updateHeroBanner } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
@@ -14,11 +14,12 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   try {
+    const { id } = await params;
     const payload = await request.json();
     const { url, title, description } = payload ?? {};
 
     const banner = await updateHeroBanner(
-      params.id,
+      id,
       {
         url: url !== undefined ? url : undefined,
         title: title !== undefined ? title : undefined,
@@ -41,7 +42,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   }
 
   try {
-    await deleteHeroBanner(params.id, request.headers);
+    const { id } = await params;
+    await deleteHeroBanner(id, request.headers);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(

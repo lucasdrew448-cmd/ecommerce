@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function AdminSuppliersPage() {
-  const requestHeaders = headers();
+  const requestHeaders = await headers();
   if (!verifyAdminTokenFromHeaders(requestHeaders)) {
     redirect("/admin/login");
   }

@@ -94,7 +94,7 @@ function isValidAdminToken(token: string | undefined): boolean {
 }
 
 // Protect all /admin routes except the public auth pages
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow access to login, register, and logout routes
