@@ -14,8 +14,8 @@ npm run dev
 Create a `.env.local` file:
 
 ```env
-NEXT_PUBLIC_COMMERCE_API_URL=https://discus-web-app-2-0.onrender.com/api
-EXTERNAL_ADMIN_AUTH_URL=https://discus-web-app-2-0.onrender.com
+NEXT_PUBLIC_COMMERCE_API_URL=https://www.charlesdiscus.website/api
+EXTERNAL_ADMIN_AUTH_URL=https://www.charlesdiscus.website
 ADMIN_SECRET=change-this-secret
 ```
 

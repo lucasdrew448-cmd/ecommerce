@@ -605,13 +605,39 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHe
   const backoffBaseMs = 3_000;
   let lastError: unknown;
 
+  // Use manual redirect handling so we can re-issue the request with the
+  // same method and body to the redirected URL. Node's fetch converts
+  // POST → GET on 301/302 redirects, which would drop the body and cause
+  // a 500 error.
+  const redirect = "manual" as const;
+
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      const response = await fetchWithTimeout(url, {
+      let response = await fetchWithTimeout(url, {
         cache: "no-store",
         ...init,
+        redirect,
         headers: mergedHeaders,
       }, requestTimeoutMs);
+
+      // Handle redirects manually to preserve the HTTP method and body.
+      // Node's fetch would otherwise convert POST → GET on 301/302.
+      let currentUrl = url;
+      let currentResponse = response;
+      let redirectCount = 0;
+      while (currentResponse.status >= 300 && currentResponse.status < 400 && redirectCount < 5) {
+        const location = currentResponse.headers.get("location");
+        if (!location) break;
+        currentUrl = new URL(location, currentUrl).toString();
+        currentResponse = await fetchWithTimeout(currentUrl, {
+          cache: "no-store",
+          ...init,
+          redirect,
+          headers: mergedHeaders,
+        }, requestTimeoutMs);
+        redirectCount += 1;
+      }
+      response = currentResponse;
 
       const rawText = await response.text();
       let json: unknown = undefined;

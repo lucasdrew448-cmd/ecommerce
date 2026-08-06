@@ -24,14 +24,42 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T>
     ? `${normalizedBase}${normalizedPath.replace(API_BASE_PATH, "")}`
     : `${normalizedBase}${normalizedPath}`;
 
-  const response = await fetch(url, {
+  // Use manual redirect handling so we can re-issue the request with the
+  // same method and body to the redirected URL. Node's fetch converts
+  // POST → GET on 301/302 redirects, which would drop the body and cause
+  // a 500 error.
+  const redirect = "manual" as const;
+
+  let response = await fetch(url, {
     cache: "no-store",
     ...init,
+    redirect,
     headers: {
       ...(init?.body ? { "Content-Type": "application/json" } : {}),
       ...init?.headers,
     },
   });
+
+  // Handle redirects manually to preserve the HTTP method and body.
+  let currentUrl = url;
+  let currentResponse = response;
+  let redirectCount = 0;
+  while (currentResponse.status >= 300 && currentResponse.status < 400 && redirectCount < 5) {
+    const location = currentResponse.headers.get("location");
+    if (!location) break;
+    currentUrl = new URL(location, currentUrl).toString();
+    currentResponse = await fetch(currentUrl, {
+      cache: "no-store",
+      ...init,
+      redirect,
+      headers: {
+        ...(init?.body ? { "Content-Type": "application/json" } : {}),
+        ...init?.headers,
+      },
+    });
+    redirectCount += 1;
+  }
+  response = currentResponse;
 
   if (!response.ok) {
     throw new Error(`Request to ${path} failed (${response.status}).`);
@@ -66,6 +94,34 @@ function parseJsonArray(value: string): unknown {
   } catch {
     return value;
   }
+}
+
+/**
+ * Normalizes a value that may be a JSON array, a pre-encoded JSON string,
+ * or an array of objects (e.g. sizes with prices) into a canonical JSON
+ * string. This preserves `additional_images` and `sizes` fields when the
+ * upstream API returns them as arrays rather than pre-encoded strings.
+ */
+function normalizeToJsonString(value: unknown): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === "string") {
+    // Already a string — try to parse it so we can re-stringify for
+    // canonical formatting. If it isn't valid JSON, keep the raw string.
+    const parsed = parseJsonArray(value);
+    if (Array.isArray(parsed) || (parsed && typeof parsed === "object")) {
+      return JSON.stringify(parsed);
+    }
+    return value;
+  }
+
+  if (Array.isArray(value) || (typeof value === "object" && value !== null)) {
+    return JSON.stringify(value);
+  }
+
+  return undefined;
 }
 
 function normalizeImageArray(value: unknown): string[] {
@@ -129,6 +185,7 @@ function normalizeProduct(item: unknown): Product {
     price: toNumber(product.price, 0),
     currency: typeof product.currency === "string" ? product.currency : "$",
     image: mainImage,
+    image_url: typeof product.image_url === "string" ? product.image_url : mainImage,
     images: orderedImages.length ? orderedImages : undefined,
     details: Array.isArray(product.details)
       ? (product.details as unknown[]).filter((value): value is string => typeof value === "string")
@@ -137,8 +194,8 @@ function normalizeProduct(item: unknown): Product {
     product_type_id: typeof product.product_type_id === "string" ? product.product_type_id : undefined,
     supplier_id: typeof product.supplier_id === "string" ? product.supplier_id : undefined,
     stock: typeof product.stock === "number" ? product.stock : undefined,
-    additional_images: typeof product.additional_images === "string" ? product.additional_images : undefined,
-    sizes: typeof product.sizes === "string" ? product.sizes : undefined,
+    additional_images: normalizeToJsonString(product.additional_images),
+    sizes: normalizeToJsonString(product.sizes),
     created_at: typeof product.created_at === "string" ? product.created_at : undefined,
     updated_at: typeof product.updated_at === "string" ? product.updated_at : undefined,
   };

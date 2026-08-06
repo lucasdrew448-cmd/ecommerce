@@ -58,6 +58,7 @@ async function uploadToCloudinary(file: File): Promise<{ url?: string; publicId?
 
   const response = await fetch("/api/admin/upload", {
     method: "POST",
+    credentials: "include",
     body: formData,
   });
 
