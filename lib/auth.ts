@@ -236,7 +236,8 @@ export function createAdminCookie(token: string): string {
   return buildCookieValue(token, ADMIN_COOKIE_MAX_AGE);
 }
 
-export function setAdminCookieOnResponse(response: NextResponse, token: string) {
+export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string) {
+  const isSecure = requestUrl ? requestUrl.startsWith("https:") : process.env.NODE_ENV === "production";
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: token,
@@ -244,7 +245,7 @@ export function setAdminCookieOnResponse(response: NextResponse, token: string) 
     httpOnly: true,
     sameSite: "lax",
     maxAge: ADMIN_COOKIE_MAX_AGE,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure,
   });
 }
 
@@ -290,7 +291,8 @@ export function clearAdminCookie(): string {
   return `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
-export function clearAdminCookieOnResponse(response: NextResponse) {
+export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: string) {
+  const isSecure = requestUrl ? requestUrl.startsWith("https:") : process.env.NODE_ENV === "production";
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: "",
@@ -298,6 +300,6 @@ export function clearAdminCookieOnResponse(response: NextResponse) {
     httpOnly: true,
     sameSite: "lax",
     maxAge: 0,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure,
   });
 }

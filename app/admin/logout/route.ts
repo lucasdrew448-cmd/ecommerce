@@ -5,7 +5,7 @@ import { clearAdminCookieOnResponse } from "@/lib/auth";
 export async function GET(request: Request) {
   const response = NextResponse.redirect(new URL("/admin/login", request.url));
 
-  clearAdminCookieOnResponse(response);
+  clearAdminCookieOnResponse(response, request.url);
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
 
   return response;
