@@ -572,6 +572,18 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHe
     ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
   };
 
+  // Debug: show which headers will be forwarded upstream for troubleshooting
+  // (do not log raw tokens in production)
+  try {
+    const masked = { ...mergedHeaders } as Record<string, string>;
+    if (masked.authorization) {
+      masked.authorization = masked.authorization.replace(/(Bearer\s+).+$/, '$1<redacted>');
+    }
+    console.debug(`[fetchCommerceApi] forwarding headers for ${path}:`, masked);
+  } catch (e) {
+    // ignore logging errors
+  }
+
   // When sending a FormData body, let the runtime set the correct
   // multipart Content-Type (with a matching boundary). Forwarding the
   // original request's content-type/content-length breaks multipart
