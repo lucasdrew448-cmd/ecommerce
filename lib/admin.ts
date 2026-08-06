@@ -1,4 +1,4 @@
-import type { Category, HeroBanner, Order, Product, ProductType, Review, Supplier, UploadResult } from "@/lib/types";
+﻿import type { Category, HeroBanner, Order, Product, ProductType, Review, Supplier, UploadResult } from "@/lib/types";
 import { FALLBACK_PRODUCTS } from "@/lib/products";
 import { ADMIN_COOKIE_NAME, parseCookies } from "@/lib/auth";
 
@@ -518,7 +518,7 @@ function isRetryableFetchError(error: unknown): boolean {
   // mutation succeeds once the upstream service finishes spinning up.
   const cause = (error as { cause?: unknown }).cause;
   const causeMessage = cause instanceof Error ? cause.message : "";
-  const causeCode = (cause as { code?: string }).code;
+  const causeCode = cause && typeof cause === "object" ? (cause as { code?: string }).code : undefined;
 
   return (
     error.message.includes("fetch failed") ||
