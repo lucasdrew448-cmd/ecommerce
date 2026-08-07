@@ -106,6 +106,22 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Skip the auth check for Next.js prefetch requests. Prefetches are
+  // issued by the router (e.g. when hovering a Link) and may not carry
+  // the auth cookie, which would cause a spurious 307 redirect to login
+  // and break client-side navigation. The real navigation request always
+  // includes the cookie and is still protected below.
+  const isPrefetch =
+    request.headers.get("Next-Router-Prefetch") === "1" ||
+    request.headers.get("next-router-prefetch") === "1" ||
+    request.nextUrl.searchParams.has("_rsc");
+
+  if (isPrefetch) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    return response;
+  }
+
   const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
 
   if (!isValidAdminToken(token)) {
