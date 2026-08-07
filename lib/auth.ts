@@ -158,10 +158,12 @@ export function isValidAdminToken(token: string | undefined): boolean {
   }
 
   const payload = decodeJwtPayload(token);
-  // If the token is not a JWT (e.g. an opaque token), accept it —
-  // it was issued by our trusted external auth endpoint.
+  // Reject tokens that cannot be decoded as a JWT. There is no
+  // verification/introspection endpoint on the external auth provider,
+  // so accepting arbitrary opaque strings would let anyone set the
+  // cookie to any value and bypass auth entirely.
   if (!payload) {
-    return true;
+    return false;
   }
 
   // Verify the token belongs to an admin user (user role must be `admin`).

@@ -72,10 +72,12 @@ function isValidAdminToken(token: string | undefined): boolean {
   }
 
   const payload = decodeJwtPayload(token);
-  // If the token is not a JWT (e.g. an opaque token), accept it —
-  // it was issued by our trusted external auth endpoint.
+  // Reject tokens that cannot be decoded as a JWT. There is no
+  // verification/introspection endpoint on the external auth provider,
+  // so accepting arbitrary opaque strings would let anyone set the
+  // cookie to any value and bypass auth entirely.
   if (!payload) {
-    return true;
+    return false;
   }
 
   // Verify the token belongs to an admin user (user role must be `admin`).
@@ -111,10 +113,13 @@ export function proxy(request: NextRequest) {
   // the auth cookie, which would cause a spurious 307 redirect to login
   // and break client-side navigation. The real navigation request always
   // includes the cookie and is still protected below.
-  const isPrefetch =
-    request.headers.get("Next-Router-Prefetch") === "1" ||
-    request.headers.get("next-router-prefetch") === "1" ||
-    request.nextUrl.searchParams.has("_rsc");
+  //
+  // Only the `Next-Router-Prefetch` header is trusted here — it is set by
+  // the framework itself and cannot be forged via URL. The `_rsc` query
+  // param is NOT used because it is attached by the App Router to every
+  // client-side navigation (not just prefetches) and can be appended to
+  // any URL by an attacker to bypass auth.
+  const isPrefetch = request.headers.get("Next-Router-Prefetch") === "1";
 
   if (isPrefetch) {
     const response = NextResponse.next();
