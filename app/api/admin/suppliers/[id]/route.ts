@@ -9,7 +9,7 @@ interface RouteParams {
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -27,7 +27,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(request: Request, { params }: RouteParams) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

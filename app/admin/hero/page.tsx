@@ -12,7 +12,7 @@ export const metadata = {
 
 export default async function AdminHeroPage() {
   const requestHeaders = await headers();
-  if (!verifyAdminTokenFromHeaders(requestHeaders)) {
+  if (!(await verifyAdminTokenFromHeaders(requestHeaders))) {
     redirect("/admin/login");
   }
   const banners = await listHeroBanners(requestHeaders);

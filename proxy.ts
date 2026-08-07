@@ -4,6 +4,8 @@ import type { NextRequest } from "next/server";
 // Keep this in sync with ADMIN_COOKIE_NAME in lib/auth.ts
 const ADMIN_COOKIE_NAME = "headless_admin";
 
+const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://charlesdiscus.website";
+
 function base64UrlDecode(str: string): string {
   // Convert base64url to standard base64
   let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
@@ -66,37 +68,64 @@ function isAdminRole(payload: Record<string, unknown>): boolean {
   return false;
 }
 
-function isValidAdminToken(token: string | undefined): boolean {
+/**
+ * Verifies an opaque (non-JWT) token against the external admin auth
+ * provider's `/verify` endpoint. This is the real verification step for
+ * tokens issued by the provider that are not JWTs — we never accept an
+ * opaque token on faith.
+ */
+async function verifyOpaqueToken(token: string): Promise<boolean> {
+  try {
+    const url = `${EXTERNAL_ADMIN_AUTH_URL.replace(/\/$/, "")}/next-api/external-admin/auth/verify`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = (await response.json()) as { authenticated?: unknown };
+    return data?.authenticated === true;
+  } catch {
+    return false;
+  }
+}
+
+async function isValidAdminToken(token: string | undefined): Promise<boolean> {
   if (!token) {
     return false;
   }
 
   const payload = decodeJwtPayload(token);
-  // Reject tokens that cannot be decoded as a JWT. There is no
-  // verification/introspection endpoint on the external auth provider,
-  // so accepting arbitrary opaque strings would let anyone set the
-  // cookie to any value and bypass auth entirely.
-  if (!payload) {
-    return false;
+
+  // JWT: verify role and expiry locally (no network call needed).
+  if (payload) {
+    // Verify the token belongs to an admin user (user role must be `admin`).
+    if (!isAdminRole(payload)) {
+      return false;
+    }
+
+    // If it is a JWT, only reject when we can positively confirm expiry.
+    // If there is no numeric exp claim we cannot determine expiry, so accept.
+    const exp = payload.exp;
+    if (typeof exp !== "number") {
+      return true;
+    }
+
+    return Date.now() < exp * 1000;
   }
 
-  // Verify the token belongs to an admin user (user role must be `admin`).
-  if (!isAdminRole(payload)) {
-    return false;
-  }
-
-  // If it is a JWT, only reject when we can positively confirm expiry.
-  // If there is no numeric exp claim we cannot determine expiry, so accept.
-  const exp = payload.exp;
-  if (typeof exp !== "number") {
-    return true;
-  }
-
-  return Date.now() < exp * 1000;
+  // Opaque token: verify against the external provider's /verify endpoint.
+  return verifyOpaqueToken(token);
 }
 
 // Protect all /admin routes except the public auth pages
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow access to login, register, and logout routes
@@ -129,7 +158,7 @@ export function proxy(request: NextRequest) {
 
   const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
 
-  if (!isValidAdminToken(token)) {
+  if (!(await isValidAdminToken(token))) {
     const loginUrl = new URL("/admin/login", request.url);
     const response = NextResponse.redirect(loginUrl);
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");

@@ -3,7 +3,7 @@ import { deleteImage, uploadImage } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 export async function POST(request: Request) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

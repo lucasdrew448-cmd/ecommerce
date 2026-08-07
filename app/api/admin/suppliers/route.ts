@@ -3,7 +3,7 @@ import { createSupplier, listSuppliers } from "@/lib/admin";
 import { verifyAdminTokenFromHeaders } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

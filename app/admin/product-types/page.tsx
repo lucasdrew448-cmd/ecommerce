@@ -12,7 +12,7 @@ export const metadata = {
 
 export default async function AdminProductTypesPage() {
   const requestHeaders = await headers();
-  if (!verifyAdminTokenFromHeaders(requestHeaders)) {
+  if (!(await verifyAdminTokenFromHeaders(requestHeaders))) {
     redirect("/admin/login");
   }
   const productTypes = await listProductTypes(requestHeaders);

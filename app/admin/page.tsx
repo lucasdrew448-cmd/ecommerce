@@ -12,7 +12,7 @@ export const metadata = {
 
 export default async function AdminDashboardPage() {
   const requestHeaders = await headers();
-  if (!verifyAdminTokenFromHeaders(requestHeaders)) {
+  if (!(await verifyAdminTokenFromHeaders(requestHeaders))) {
     redirect("/admin/login");
   }
   const [products, orders] = await Promise.all([listAdminProducts(requestHeaders), listAdminOrders(requestHeaders)]);

@@ -11,7 +11,7 @@ interface RouteParams {
 const VALID_STATUSES = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
 export async function PUT(request: Request, { params }: RouteParams) {
-  if (!verifyAdminTokenFromHeaders(request.headers)) {
+  if (!(await verifyAdminTokenFromHeaders(request.headers))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
