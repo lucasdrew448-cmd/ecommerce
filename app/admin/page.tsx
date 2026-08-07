@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { listAdminOrders, listAdminProducts } from "@/lib/admin";
-import { verifyAdminTokenFromHeaders } from "@/lib/auth";
+import { verifyAdminTokenFromCookies } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -11,8 +11,9 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const requestHeaders = await headers();
-  if (!(await verifyAdminTokenFromHeaders(requestHeaders))) {
+  const requestHeaders = headers();
+  const requestCookies = cookies();
+  if (!(await verifyAdminTokenFromCookies(requestCookies))) {
     redirect("/admin/login");
   }
   const [products, orders] = await Promise.all([listAdminProducts(requestHeaders), listAdminOrders(requestHeaders)]);

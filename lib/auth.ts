@@ -255,6 +255,11 @@ export async function verifyAdminTokenFromHeaders(headers?: HeadersInit): Promis
   return isValidAdminToken(cookies[ADMIN_COOKIE_NAME]) || isValidAdminToken(cookies[SECURE_ADMIN_COOKIE_NAME]);
 }
 
+export async function verifyAdminTokenFromCookies(cookiesObj: { get(name: string): { value: string } | undefined }): Promise<boolean> {
+  const token = cookiesObj.get(SECURE_ADMIN_COOKIE_NAME)?.value ?? cookiesObj.get(ADMIN_COOKIE_NAME)?.value;
+  return isValidAdminToken(token);
+}
+
 function getHeaderValue(name: string, headers?: HeadersInit): string | null {
   if (!headers) {
     return null;
