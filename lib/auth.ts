@@ -320,14 +320,24 @@ export function createAdminCookie(token: string, requestUrl?: string, headers?: 
 export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
 
+  const cookieOptions = {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax" as const,
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+    secure: isSecure,
+  };
+
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: token,
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: ADMIN_COOKIE_MAX_AGE,
-    secure: isSecure,
+    ...cookieOptions,
+  });
+
+  response.cookies.set({
+    name: LEGACY_SECURE_ADMIN_COOKIE_NAME,
+    value: token,
+    ...cookieOptions,
   });
 }
 
