@@ -7,17 +7,14 @@ declare const process: {
 };
 
 const API_BASE_PATH = "/api";
+const DEFAULT_COMMERCE_API_URL = "https://www.charlesdiscus.website/api";
 
-function getApiBaseUrl(): string | null {
-  return process.env.NEXT_PUBLIC_COMMERCE_API_URL || null;
+function getApiBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_COMMERCE_API_URL || process.env.COMMERCE_API_URL || DEFAULT_COMMERCE_API_URL;
 }
 
 async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T> {
   const baseUrl = getApiBaseUrl();
-  if (!baseUrl) {
-    throw new Error("Commerce API URL not configured.");
-  }
-
   const normalizedBase = baseUrl.replace(/\/$/, "");
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const url = normalizedBase.includes("/api") && normalizedPath.startsWith(API_BASE_PATH)
@@ -359,42 +356,30 @@ function normalizeOrder(item: unknown): Order {
 }
 
 export async function getProducts(params?: { category_id?: string; search?: string }): Promise<Product[]> {
-  if (getApiBaseUrl()) {
-    try {
-      const query = new URLSearchParams();
-      if (params?.category_id) query.set("category_id", params.category_id);
-      if (params?.search) query.set("search", params.search);
+  try {
+    const query = new URLSearchParams();
+    if (params?.category_id) query.set("category_id", params.category_id);
+    if (params?.search) query.set("search", params.search);
 
-      const qs = query.toString();
-      const data = await fetchCommerceApi<unknown>(`/products${qs ? `?${qs}` : ""}`);
-      return normalizeProducts(data);
-    } catch {
-      return FALLBACK_PRODUCTS;
-    }
+    const qs = query.toString();
+    const data = await fetchCommerceApi<unknown>(`/products${qs ? `?${qs}` : ""}`);
+    return normalizeProducts(data);
+  } catch {
+    return FALLBACK_PRODUCTS;
   }
-
-  return FALLBACK_PRODUCTS;
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  if (getApiBaseUrl()) {
-    try {
-      const data = await fetchCommerceApi<unknown>(`/products?slug=${encodeURIComponent(slug)}`);
-      const products = normalizeProducts(data);
-      return products.find((product) => product.slug === slug);
-    } catch {
-      return FALLBACK_PRODUCTS.find((product) => product.slug === slug);
-    }
+  try {
+    const data = await fetchCommerceApi<unknown>(`/products?slug=${encodeURIComponent(slug)}`);
+    const products = normalizeProducts(data);
+    return products.find((product) => product.slug === slug);
+  } catch {
+    return FALLBACK_PRODUCTS.find((product) => product.slug === slug);
   }
-
-  return FALLBACK_PRODUCTS.find((product) => product.slug === slug);
 }
 
 export async function getProductById(id: string): Promise<Product | undefined> {
-  if (!getApiBaseUrl()) {
-    return FALLBACK_PRODUCTS.find((product) => product.id === id);
-  }
-
   try {
     const data = await fetchCommerceApi<unknown>(`/products/${encodeURIComponent(id)}`);
     const products = normalizeProducts(data);
@@ -405,7 +390,6 @@ export async function getProductById(id: string): Promise<Product | undefined> {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  if (!getApiBaseUrl()) return [];
   try {
     const data = await fetchCommerceApi<unknown>("/categories");
     return normalizeArray(data, normalizeCategory);
@@ -415,7 +399,6 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getProductTypes(): Promise<ProductType[]> {
-  if (!getApiBaseUrl()) return [];
   try {
     const data = await fetchCommerceApi<unknown>("/product-types");
     return normalizeArray(data, normalizeProductType);
@@ -425,8 +408,6 @@ export async function getProductTypes(): Promise<ProductType[]> {
 }
 
 export async function getSuppliers(params?: { search?: string; status?: string }): Promise<Supplier[]> {
-  if (!getApiBaseUrl()) return [];
-
   try {
     const query = new URLSearchParams();
     if (params?.search) query.set("search", params.search);
@@ -441,7 +422,6 @@ export async function getSuppliers(params?: { search?: string; status?: string }
 }
 
 export async function getHeroBanners(): Promise<HeroBanner[]> {
-  if (!getApiBaseUrl()) return [];
   try {
     const data = await fetchCommerceApi<unknown>("/hero");
     return normalizeArray(data, normalizeHeroBanner);
@@ -455,10 +435,6 @@ export async function getStoreReviews(params?: { limit?: number; offset?: number
   averageRating: string;
   total: number;
 }> {
-  if (!getApiBaseUrl()) {
-    return { data: [], averageRating: "0", total: 0 };
-  }
-
   try {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", String(params.limit));
@@ -488,10 +464,6 @@ export async function getProductReviews(productId: string, params?: { limit?: nu
   averageRating: string;
   total: number;
 }> {
-  if (!getApiBaseUrl()) {
-    return { data: [], averageRating: "0", total: 0 };
-  }
-
   try {
     const query = new URLSearchParams();
     if (params?.limit) query.set("limit", String(params.limit));

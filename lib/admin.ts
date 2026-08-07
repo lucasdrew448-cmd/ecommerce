@@ -6,6 +6,8 @@ declare const process: {
   env: Record<string, string | undefined>;
 };
 
+const DEFAULT_COMMERCE_API_URL = "https://www.charlesdiscus.website/api";
+
 export type AdminProductInput = {
   id?: string;
   slug?: string;
@@ -59,8 +61,8 @@ const FALLBACK_ORDERS: AdminOrder[] = [
 let adminProductStore: Product[] = FALLBACK_PRODUCTS.map((product) => ({ ...product }));
 let adminOrderStore: AdminOrder[] = FALLBACK_ORDERS.map((order) => ({ ...order }));
 
-function getApiBaseUrl(): string | null {
-  return process.env.NEXT_PUBLIC_COMMERCE_API_URL || null;
+function getApiBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_COMMERCE_API_URL || process.env.COMMERCE_API_URL || DEFAULT_COMMERCE_API_URL;
 }
 
 function createSlug(name: string): string {
