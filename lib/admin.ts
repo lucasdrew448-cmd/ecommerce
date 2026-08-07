@@ -493,7 +493,7 @@ function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   // (create/update/delete) are authorized by the upstream API.
   if (!normalized.authorization && normalized.cookie) {
     const cookies = parseCookies(normalized.cookie);
-    const token = cookies[ADMIN_COOKIE_NAME];
+    const token = cookies[ADMIN_COOKIE_NAME] ?? cookies["__Host-headless_admin"];
     if (token) {
       normalized.authorization = `Bearer ${token}`;
     }
