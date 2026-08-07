@@ -13,6 +13,8 @@ export async function POST(request: Request) {
     const result = await loginAdmin(email, password);
     const token = extractTokenFromAuthResponse(result);
 
+    console.log("[admin-login] auth response type", typeof result, "token extracted", Boolean(token));
+
     if (!token) {
       return NextResponse.json({ error: "Authentication succeeded but no token was returned." }, { status: 502 });
     }

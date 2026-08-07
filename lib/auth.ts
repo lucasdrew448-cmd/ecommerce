@@ -330,6 +330,11 @@ export function setAdminCookieOnResponse(response: NextResponse, token: string, 
 }
 
 export function extractTokenFromAuthResponse(response: unknown): string | null {
+  if (typeof response === "string") {
+    const trimmed = response.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
   if (!response || typeof response !== "object") {
     return null;
   }
