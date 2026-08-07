@@ -308,8 +308,9 @@ function isSecureRequest(requestUrl?: string, headers?: HeadersInit): boolean {
 
 function buildCookieValue(value: string, maxAgeSeconds: number, cookieName: string, isSecure: boolean, clear = false) {
   const secure = isSecure ? "; Secure" : "";
+  const sameSite = "; SameSite=None";
   const maxAge = clear ? "; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT" : `; Max-Age=${maxAgeSeconds}`;
-  return `${cookieName}=${value}; Path=/; HttpOnly; SameSite=Lax${maxAge}${secure}`;
+  return `${cookieName}=${value}; Path=/; HttpOnly${sameSite}${maxAge}${secure}`;
 }
 
 export const ADMIN_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
