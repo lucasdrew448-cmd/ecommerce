@@ -37,9 +37,14 @@ export default async function AdminDashboardPage() {
               <h1>Admin dashboard</h1>
               <p>Manage the full Discus ecommerce catalog, reviews, orders, and site content.</p>
             </div>
-            <Link href="/admin/logout" className="rounded-full border border-slate-300 px-4 py-2 font-semibold text-slate-700">
-              Logout
-            </Link>
+            <form action="/admin/logout" method="POST">
+              <button
+                type="submit"
+                className="rounded-full border border-slate-300 px-4 py-2 font-semibold text-slate-700"
+              >
+                Logout
+              </button>
+            </form>
           </div>
         </div>
 
