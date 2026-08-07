@@ -314,7 +314,16 @@ export function createAdminCookie(token: string, requestUrl?: string, headers?: 
 export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
   const cookieName = getAdminCookieName(requestUrl, headers);
-  response.headers.append("Set-Cookie", buildCookieValue(token, ADMIN_COOKIE_MAX_AGE, cookieName, isSecure));
+
+  response.cookies.set({
+    name: cookieName,
+    value: token,
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+    secure: isSecure,
+  });
 }
 
 export function extractTokenFromAuthResponse(response: unknown): string | null {
@@ -362,9 +371,26 @@ export function clearAdminCookie(): string {
 export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
   const cookieName = getAdminCookieName(requestUrl, headers);
-  response.headers.append("Set-Cookie", buildCookieValue("", 0, cookieName, isSecure));
+
+  response.cookies.set({
+    name: cookieName,
+    value: "",
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 0,
+    secure: isSecure,
+  });
 
   if (isSecure) {
-    response.headers.append("Set-Cookie", buildCookieValue("", 0, ADMIN_COOKIE_NAME, true));
+    response.cookies.set({
+      name: ADMIN_COOKIE_NAME,
+      value: "",
+      path: "/",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 0,
+      secure: true,
+    });
   }
 }
