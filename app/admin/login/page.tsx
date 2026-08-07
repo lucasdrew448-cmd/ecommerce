@@ -45,6 +45,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    console.log("login form submit handler called", { email, password: password ? "***" : "" });
     event.preventDefault();
     setError(null);
     setLoading(true);
