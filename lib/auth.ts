@@ -306,32 +306,15 @@ function isSecureRequest(requestUrl?: string, headers?: HeadersInit): boolean {
   return process.env.NODE_ENV === "production";
 }
 
-function getCookieDomain(requestUrl?: string, headers?: HeadersInit): string | null {
-  const host = getHeaderValue("x-forwarded-host", headers) ?? getHeaderValue("host", headers);
-  const candidate = requestUrl ? new URL(requestUrl).hostname : host;
-
-  if (!candidate) {
-    return null;
-  }
-
-  const normalized = candidate.toLowerCase();
-  if (normalized === "localhost" || normalized.startsWith("127.0.0.1") || normalized.includes("localhost")) {
-    return null;
-  }
-
-  if (normalized.startsWith("www.")) {
-    return `.${normalized.slice(4)}`;
-  }
-
-  return normalized.includes(".") ? `.${normalized}` : null;
+function getCookieSameSite(isSecure: boolean): "lax" | "none" {
+  return isSecure ? "none" : "lax";
 }
 
-function buildCookieValue(value: string, maxAgeSeconds: number, cookieName: string, isSecure: boolean, clear = false, domain?: string | null) {
+function buildCookieValue(value: string, maxAgeSeconds: number, cookieName: string, isSecure: boolean, clear = false) {
   const secure = isSecure ? "; Secure" : "";
-  const sameSite = "; SameSite=None";
+  const sameSite = isSecure ? "; SameSite=None" : "; SameSite=Lax";
   const maxAge = clear ? "; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT" : `; Max-Age=${maxAgeSeconds}`;
-  const domainPart = domain ? `; Domain=${domain}` : "";
-  return `${cookieName}=${value}; Path=/; HttpOnly${sameSite}${maxAge}${domainPart}${secure}`;
+  return `${cookieName}=${value}; Path=/; HttpOnly${sameSite}${maxAge}${secure}`;
 }
 
 export const ADMIN_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -342,17 +325,16 @@ export function createAdminCookie(token: string, requestUrl?: string, headers?: 
 
 export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
-  const domain = getCookieDomain(requestUrl, headers);
+  const sameSite = getCookieSameSite(isSecure);
 
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: token,
     path: "/",
     httpOnly: true,
-    sameSite: "none",
+    sameSite,
     secure: isSecure,
     maxAge: ADMIN_COOKIE_MAX_AGE,
-    domain: domain ?? undefined,
   });
 
   response.cookies.set({
@@ -360,7 +342,7 @@ export function setAdminCookieOnResponse(response: NextResponse, token: string, 
     value: token,
     path: "/",
     httpOnly: true,
-    sameSite: "none",
+    sameSite: isSecure ? "none" : "lax",
     secure: true,
     maxAge: ADMIN_COOKIE_MAX_AGE,
   });
@@ -410,17 +392,16 @@ export function clearAdminCookie(): string {
 
 export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
-  const domain = getCookieDomain(requestUrl, headers);
+  const sameSite = getCookieSameSite(isSecure);
 
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
     value: "",
     path: "/",
     httpOnly: true,
-    sameSite: "none",
+    sameSite,
     secure: isSecure,
     maxAge: 0,
-    domain: domain ?? undefined,
   });
 
   response.cookies.set({
@@ -428,7 +409,7 @@ export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: 
     value: "",
     path: "/",
     httpOnly: true,
-    sameSite: "none",
+    sameSite: isSecure ? "none" : "lax",
     secure: true,
     maxAge: 0,
   });
