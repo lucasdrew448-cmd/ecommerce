@@ -81,8 +81,8 @@ export default function Header() {
             <span className="sm:hidden">Free shipping over $150</span>
           </p>
           <div className="hidden items-center gap-4 sm:flex">
-            <Link href="/order" className="font-medium transition hover:text-blue-100">
-              Track order
+            <Link href="/store" className="font-medium transition hover:text-blue-100">
+              Shop now
             </Link>
             <span className="text-blue-300" aria-hidden="true">|</span>
             <a
@@ -277,10 +277,10 @@ export default function Header() {
               </Link>
             ))}
             <Link
-              href="/order"
+              href="/store"
               className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-blue-600"
             >
-              Track order
+              Shop now
             </Link>
           </div>
         </nav>
