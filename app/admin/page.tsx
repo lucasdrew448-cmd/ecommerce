@@ -11,8 +11,8 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const requestHeaders = headers();
-  const requestCookies = cookies();
+  const requestHeaders = await headers();
+  const requestCookies = await cookies();
   if (!(await verifyAdminTokenFromCookies(requestCookies))) {
     redirect("/admin/login");
   }
