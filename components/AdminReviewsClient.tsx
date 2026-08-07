@@ -14,7 +14,10 @@ export default function AdminReviewsClient({ initialReviews }: { initialReviews:
     if (status && status !== "all") params.set("status", status);
 
     const qs = params.toString();
-    const response = await fetch(`/api/admin/reviews${qs ? `?${qs}` : ""}`, { cache: "no-store" });
+    const response = await fetch(`/api/admin/reviews${qs ? `?${qs}` : ""}`, {
+      cache: "no-store",
+      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+    });
     const data = await response.json();
     setReviews((data.data as Review[]) ?? []);
     setTotal((data.total as number) ?? 0);
@@ -23,7 +26,7 @@ export default function AdminReviewsClient({ initialReviews }: { initialReviews:
   const handleStatusChange = async (review: Review, newStatus: string) => {
     const response = await fetch(`/api/admin/reviews/${review.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
       body: JSON.stringify({ status: newStatus }),
     });
 
@@ -41,7 +44,10 @@ export default function AdminReviewsClient({ initialReviews }: { initialReviews:
       return;
     }
 
-    const response = await fetch(`/api/admin/reviews/${review.id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/reviews/${review.id}`, {
+      method: "DELETE",
+      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+    });
     if (response.ok) {
       setMessage("Review deleted.");
       await refresh();

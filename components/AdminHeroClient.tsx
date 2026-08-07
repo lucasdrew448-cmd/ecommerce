@@ -23,7 +23,10 @@ export default function AdminHeroClient({ initialBanners }: { initialBanners: He
   const [message, setMessage] = useState<string | null>(null);
 
   const refresh = async () => {
-    const response = await fetch("/api/admin/hero", { cache: "no-store" });
+    const response = await fetch("/api/admin/hero", {
+      cache: "no-store",
+      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+    });
     const data = await response.json();
     setBanners(data as HeroBanner[]);
   };
@@ -44,7 +47,7 @@ export default function AdminHeroClient({ initialBanners }: { initialBanners: He
     try {
       const response = await fetch(endpoint, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
         body: JSON.stringify(payload),
       });
 
@@ -77,7 +80,10 @@ export default function AdminHeroClient({ initialBanners }: { initialBanners: He
       return;
     }
 
-    const response = await fetch(`/api/admin/hero/${banner.id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/hero/${banner.id}`, {
+      method: "DELETE",
+      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+    });
     if (response.ok) {
       setMessage("Banner deleted.");
       await refresh();

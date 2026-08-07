@@ -15,7 +15,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Ad
 
     const response = await fetch(`/api/admin/orders/${order.id}/status`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
       body: JSON.stringify({ status: newStatus }),
     });
 
@@ -37,7 +37,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Ad
     try {
       const response = await fetch(`/api/admin/orders/${order.id}/payment-status`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
         body: JSON.stringify({ paymentStatus }),
       });
 

@@ -59,6 +59,7 @@ async function uploadToCloudinary(file: File): Promise<{ url?: string; publicId?
   const response = await fetch("/api/admin/upload", {
     method: "POST",
     credentials: "include",
+    headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
     body: formData,
   });
 
@@ -78,7 +79,10 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
   const [uploading, setUploading] = useState(false);
 
   const refreshProducts = async () => {
-    const response = await fetch("/api/admin/products", { cache: "no-store" });
+    const response = await fetch("/api/admin/products", {
+      cache: "no-store",
+      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+    });
     const data = await safeParseJson<Product[]>(response);
     setProducts(Array.isArray(data) ? data : []);
   };
@@ -171,7 +175,7 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
     try {
       const response = await fetch(endpoint, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
         body: JSON.stringify(payload),
       });
 
@@ -244,7 +248,10 @@ export default function AdminProductsClient({ initialProducts, categories = [], 
       return;
     }
 
-    const response = await fetch(`/api/admin/products/${product.id}`, { method: "DELETE" });
+    const response = await fetch(`/api/admin/products/${product.id}`, {
+      method: "DELETE",
+      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+    });
     if (response.ok) {
       setMessage(`Deleted ${product.name}.`);
       await refreshProducts();
