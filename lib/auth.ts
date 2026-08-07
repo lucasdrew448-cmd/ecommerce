@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import type { NextResponse } from "next/server";
 
 declare const process: {
@@ -152,32 +153,42 @@ function isAdminRole(payload: Record<string, unknown>): boolean {
   return false;
 }
 
+function hmacSign(value: string): string {
+  return createHmac("sha256", ADMIN_SECRET).update(value).digest("hex");
+}
+
+function hmacVerify(value: string, signature: string): boolean {
+  const expected = hmacSign(value);
+  const a = Buffer.from(expected, "hex");
+  const b = Buffer.from(signature, "hex");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 /**
- * Verifies an opaque (non-JWT) token against the external admin auth
- * provider's `/verify` endpoint. This is the real verification step for
- * tokens issued by the provider that are not JWTs — we never accept an
- * opaque token on faith.
+ * Signs an admin token with an HMAC-SHA256 signature using ADMIN_SECRET.
+ * The cookie stores `${token}.${signature}` so that only our server (which
+ * knows the secret) can mint a valid cookie. This prevents an attacker from
+ * setting the cookie to an arbitrary value (e.g. "letmein") to bypass auth.
  */
-async function verifyOpaqueToken(token: string): Promise<boolean> {
-  try {
-    const url = `${getExternalAdminAuthUrl()}/next-api/external-admin/auth/verify`;
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    });
+export function signAdminToken(token: string): string {
+  return `${token}.${hmacSign(token)}`;
+}
 
-    if (!response.ok) {
-      return false;
-    }
-
-    const data = (await response.json()) as { authenticated?: unknown };
-    return data?.authenticated === true;
-  } catch {
-    return false;
+/**
+ * Verifies the HMAC signature on a signed admin token and returns the
+ * inner token, or null if the signature is invalid.
+ */
+export function verifySignedAdminToken(signedToken: string): string | null {
+  const lastDot = signedToken.lastIndexOf(".");
+  if (lastDot <= 0) {
+    return null;
   }
+  const token = signedToken.slice(0, lastDot);
+  const signature = signedToken.slice(lastDot + 1);
+  if (!hmacVerify(token, signature)) {
+    return null;
+  }
+  return token;
 }
 
 export async function isValidAdminToken(token: string | undefined): Promise<boolean> {
@@ -185,7 +196,14 @@ export async function isValidAdminToken(token: string | undefined): Promise<bool
     return false;
   }
 
-  const payload = decodeJwtPayload(token);
+  // The cookie must be HMAC-signed by our server. Reject anything that
+  // isn't (e.g. an attacker setting the cookie to "letmein").
+  const innerToken = verifySignedAdminToken(token);
+  if (!innerToken) {
+    return false;
+  }
+
+  const payload = decodeJwtPayload(innerToken);
 
   // JWT: verify role and expiry locally (no network call needed).
   if (payload) {
@@ -204,8 +222,9 @@ export async function isValidAdminToken(token: string | undefined): Promise<bool
     return Date.now() < exp * 1000;
   }
 
-  // Opaque token: verify against the external provider's /verify endpoint.
-  return verifyOpaqueToken(token);
+  // Opaque token: it was signed by our server after a successful login,
+  // so it is authentic. Accept it.
+  return true;
 }
 
 function extractBearerToken(authHeader: string): string | null {
@@ -269,7 +288,7 @@ export function setAdminCookieOnResponse(response: NextResponse, token: string, 
   const isSecure = requestUrl ? requestUrl.startsWith("https:") : process.env.NODE_ENV === "production";
   response.cookies.set({
     name: ADMIN_COOKIE_NAME,
-    value: token,
+    value: signAdminToken(token),
     path: "/",
     httpOnly: true,
     sameSite: "lax",

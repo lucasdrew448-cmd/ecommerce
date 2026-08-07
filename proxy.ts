@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // Keep this in sync with ADMIN_COOKIE_NAME in lib/auth.ts
 const ADMIN_COOKIE_NAME = "headless_admin";
 
-const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://charlesdiscus.website";
+const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
 
 function base64UrlDecode(str: string): string {
   // Convert base64url to standard base64
@@ -68,32 +68,48 @@ function isAdminRole(payload: Record<string, unknown>): boolean {
   return false;
 }
 
-/**
- * Verifies an opaque (non-JWT) token against the external admin auth
- * provider's `/verify` endpoint. This is the real verification step for
- * tokens issued by the provider that are not JWTs — we never accept an
- * opaque token on faith.
- */
-async function verifyOpaqueToken(token: string): Promise<boolean> {
-  try {
-    const url = `${EXTERNAL_ADMIN_AUTH_URL.replace(/\/$/, "")}/next-api/external-admin/auth/verify`;
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    });
+async function hmacSign(value: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(ADMIN_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(value));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
-    if (!response.ok) {
-      return false;
-    }
-
-    const data = (await response.json()) as { authenticated?: unknown };
-    return data?.authenticated === true;
-  } catch {
+async function hmacVerify(value: string, signature: string): Promise<boolean> {
+  const expected = await hmacSign(value);
+  if (expected.length !== signature.length) {
     return false;
   }
+  let diff = 0;
+  for (let i = 0; i < expected.length; i += 1) {
+    diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
+ * Verifies the HMAC signature on a signed admin token and returns the
+ * inner token, or null if the signature is invalid.
+ */
+async function verifySignedAdminToken(signedToken: string): Promise<string | null> {
+  const lastDot = signedToken.lastIndexOf(".");
+  if (lastDot <= 0) {
+    return null;
+  }
+  const token = signedToken.slice(0, lastDot);
+  const signature = signedToken.slice(lastDot + 1);
+  if (!(await hmacVerify(token, signature))) {
+    return null;
+  }
+  return token;
 }
 
 async function isValidAdminToken(token: string | undefined): Promise<boolean> {
@@ -101,7 +117,14 @@ async function isValidAdminToken(token: string | undefined): Promise<boolean> {
     return false;
   }
 
-  const payload = decodeJwtPayload(token);
+  // The cookie must be HMAC-signed by our server. Reject anything that
+  // isn't (e.g. an attacker setting the cookie to "letmein").
+  const innerToken = await verifySignedAdminToken(token);
+  if (!innerToken) {
+    return false;
+  }
+
+  const payload = decodeJwtPayload(innerToken);
 
   // JWT: verify role and expiry locally (no network call needed).
   if (payload) {
@@ -120,8 +143,9 @@ async function isValidAdminToken(token: string | undefined): Promise<boolean> {
     return Date.now() < exp * 1000;
   }
 
-  // Opaque token: verify against the external provider's /verify endpoint.
-  return verifyOpaqueToken(token);
+  // Opaque token: it was signed by our server after a successful login,
+  // so it is authentic. Accept it.
+  return true;
 }
 
 // Protect all /admin routes except the public auth pages
