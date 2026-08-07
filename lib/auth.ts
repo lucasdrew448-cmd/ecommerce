@@ -306,13 +306,9 @@ function isSecureRequest(requestUrl?: string, headers?: HeadersInit): boolean {
   return process.env.NODE_ENV === "production";
 }
 
-function getCookieSameSite(isSecure: boolean): "lax" | "none" {
-  return isSecure ? "none" : "lax";
-}
-
 function buildCookieValue(value: string, maxAgeSeconds: number, cookieName: string, isSecure: boolean, clear = false) {
   const secure = isSecure ? "; Secure" : "";
-  const sameSite = isSecure ? "; SameSite=None" : "; SameSite=Lax";
+  const sameSite = "; SameSite=Lax";
   const maxAge = clear ? "; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT" : `; Max-Age=${maxAgeSeconds}`;
   return `${cookieName}=${value}; Path=/; HttpOnly${sameSite}${maxAge}${secure}`;
 }
@@ -325,27 +321,12 @@ export function createAdminCookie(token: string, requestUrl?: string, headers?: 
 
 export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
-  const sameSite = getCookieSameSite(isSecure);
 
-  response.cookies.set({
-    name: ADMIN_COOKIE_NAME,
-    value: token,
-    path: "/",
-    httpOnly: true,
-    sameSite,
-    secure: isSecure,
-    maxAge: ADMIN_COOKIE_MAX_AGE,
-  });
-
-  response.cookies.set({
-    name: LEGACY_SECURE_ADMIN_COOKIE_NAME,
-    value: token,
-    path: "/",
-    httpOnly: true,
-    sameSite: isSecure ? "none" : "lax",
-    secure: true,
-    maxAge: ADMIN_COOKIE_MAX_AGE,
-  });
+  response.headers.append("set-cookie", buildCookieValue(token, ADMIN_COOKIE_MAX_AGE, ADMIN_COOKIE_NAME, isSecure));
+  response.headers.append(
+    "set-cookie",
+    buildCookieValue(token, ADMIN_COOKIE_MAX_AGE, LEGACY_SECURE_ADMIN_COOKIE_NAME, true)
+  );
 }
 
 export function extractTokenFromAuthResponse(response: unknown): string | null {
@@ -392,25 +373,7 @@ export function clearAdminCookie(): string {
 
 export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
-  const sameSite = getCookieSameSite(isSecure);
 
-  response.cookies.set({
-    name: ADMIN_COOKIE_NAME,
-    value: "",
-    path: "/",
-    httpOnly: true,
-    sameSite,
-    secure: isSecure,
-    maxAge: 0,
-  });
-
-  response.cookies.set({
-    name: LEGACY_SECURE_ADMIN_COOKIE_NAME,
-    value: "",
-    path: "/",
-    httpOnly: true,
-    sameSite: isSecure ? "none" : "lax",
-    secure: true,
-    maxAge: 0,
-  });
+  response.headers.append("set-cookie", buildCookieValue("", 0, ADMIN_COOKIE_NAME, isSecure, true));
+  response.headers.append("set-cookie", buildCookieValue("", 0, LEGACY_SECURE_ADMIN_COOKIE_NAME, true, true));
 }
