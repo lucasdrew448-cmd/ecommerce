@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Keep this in sync with ADMIN_COOKIE_NAME in lib/auth.ts
+// Keep this in sync with cookie names in lib/auth.ts
 const ADMIN_COOKIE_NAME = "headless_admin";
+const SECURE_ADMIN_COOKIE_NAME = "__Host-headless_admin";
 
 const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://charlesdiscus.website";
 
@@ -156,7 +157,7 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+  const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value ?? request.cookies.get(SECURE_ADMIN_COOKIE_NAME)?.value;
 
   if (!(await isValidAdminToken(token))) {
     const loginUrl = new URL("/admin/login", request.url);

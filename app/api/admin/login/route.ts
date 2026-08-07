@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({ success: true }, { status: 200 });
-    setAdminCookieOnResponse(response, token, request.url);
+    setAdminCookieOnResponse(response, token, request.url, request.headers);
     return response;
   } catch (error) {
     return NextResponse.json(

@@ -6,6 +6,7 @@ declare const process: {
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
 export const ADMIN_COOKIE_NAME = "headless_admin";
+const SECURE_ADMIN_COOKIE_NAME = "__Host-headless_admin";
 
 const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://charlesdiscus.website";
 
@@ -251,31 +252,69 @@ export async function verifyAdminTokenFromHeaders(headers?: HeadersInit): Promis
 
   const cookieHeader = getCookieHeaderFromHeaders(headers);
   const cookies = parseCookies(cookieHeader);
-  return isValidAdminToken(cookies[ADMIN_COOKIE_NAME]);
+  return isValidAdminToken(cookies[ADMIN_COOKIE_NAME]) || isValidAdminToken(cookies[SECURE_ADMIN_COOKIE_NAME]);
 }
 
-function buildCookieValue(value: string, maxAgeSeconds: number) {
-  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  return `${ADMIN_COOKIE_NAME}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
+function getHeaderValue(name: string, headers?: HeadersInit): string | null {
+  if (!headers) {
+    return null;
+  }
+
+  if (typeof (headers as { get?: unknown }).get === "function") {
+    return (headers as { get: (name: string) => string | null }).get(name);
+  }
+
+  if (headers instanceof Headers) {
+    return headers.get(name);
+  }
+
+  if (Array.isArray(headers)) {
+    const entry = headers.find(([headerName]) => headerName.toLowerCase() === name.toLowerCase());
+    return entry ? (entry[1] as string) : null;
+  }
+
+  const value = (headers as Record<string, unknown>)[name];
+  return typeof value === "string" ? value : null;
+}
+
+function isSecureRequest(requestUrl?: string, headers?: HeadersInit): boolean {
+  if (requestUrl) {
+    if (requestUrl.startsWith("https://")) {
+      return true;
+    }
+
+    if (requestUrl.startsWith("http://")) {
+      return false;
+    }
+  }
+
+  const forwardedProto = getHeaderValue("x-forwarded-proto", headers);
+  if (forwardedProto) {
+    return forwardedProto.split(",")[0].trim().toLowerCase() === "https";
+  }
+
+  return process.env.NODE_ENV === "production";
+}
+
+function getAdminCookieName(requestUrl?: string, headers?: HeadersInit): string {
+  return isSecureRequest(requestUrl, headers) ? SECURE_ADMIN_COOKIE_NAME : ADMIN_COOKIE_NAME;
+}
+
+function buildCookieValue(value: string, maxAgeSeconds: number, cookieName: string, isSecure: boolean) {
+  const secure = isSecure ? "; Secure" : "";
+  return `${cookieName}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
 }
 
 export const ADMIN_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
-export function createAdminCookie(token: string): string {
-  return buildCookieValue(token, ADMIN_COOKIE_MAX_AGE);
+export function createAdminCookie(token: string, requestUrl?: string, headers?: HeadersInit): string {
+  return buildCookieValue(token, ADMIN_COOKIE_MAX_AGE, getAdminCookieName(requestUrl, headers), isSecureRequest(requestUrl, headers));
 }
 
-export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string) {
-  const isSecure = requestUrl ? requestUrl.startsWith("https:") : process.env.NODE_ENV === "production";
-  response.cookies.set({
-    name: ADMIN_COOKIE_NAME,
-    value: token,
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: ADMIN_COOKIE_MAX_AGE,
-    secure: isSecure,
-  });
+export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string, headers?: HeadersInit) {
+  const isSecure = isSecureRequest(requestUrl, headers);
+  const cookieName = getAdminCookieName(requestUrl, headers);
+  response.headers.append("Set-Cookie", buildCookieValue(token, ADMIN_COOKIE_MAX_AGE, cookieName, isSecure));
 }
 
 export function extractTokenFromAuthResponse(response: unknown): string | null {
@@ -320,15 +359,12 @@ export function clearAdminCookie(): string {
   return `${ADMIN_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
-export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: string) {
-  const isSecure = requestUrl ? requestUrl.startsWith("https:") : process.env.NODE_ENV === "production";
-  response.cookies.set({
-    name: ADMIN_COOKIE_NAME,
-    value: "",
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 0,
-    secure: isSecure,
-  });
+export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: string, headers?: HeadersInit) {
+  const isSecure = isSecureRequest(requestUrl, headers);
+  const cookieName = getAdminCookieName(requestUrl, headers);
+  response.headers.append("Set-Cookie", buildCookieValue("", 0, cookieName, isSecure));
+
+  if (isSecure) {
+    response.headers.append("Set-Cookie", buildCookieValue("", 0, ADMIN_COOKIE_NAME, true));
+  }
 }
