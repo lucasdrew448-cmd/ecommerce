@@ -340,16 +340,30 @@ export function createAdminCookie(token: string, requestUrl?: string, headers?: 
   return buildCookieValue(token, ADMIN_COOKIE_MAX_AGE, ADMIN_COOKIE_NAME, isSecureRequest(requestUrl, headers));
 }
 
-function appendSetCookieHeader(response: NextResponse, cookieName: string, value: string, isSecure: boolean, clear = false, domain?: string | null) {
-  response.headers.append("set-cookie", buildCookieValue(value, ADMIN_COOKIE_MAX_AGE, cookieName, isSecure, clear, domain));
-}
-
 export function setAdminCookieOnResponse(response: NextResponse, token: string, requestUrl?: string, headers?: HeadersInit) {
   const isSecure = isSecureRequest(requestUrl, headers);
   const domain = getCookieDomain(requestUrl, headers);
 
-  appendSetCookieHeader(response, ADMIN_COOKIE_NAME, token, isSecure, false, domain);
-  appendSetCookieHeader(response, LEGACY_SECURE_ADMIN_COOKIE_NAME, token, true, false, null);
+  response.cookies.set({
+    name: ADMIN_COOKIE_NAME,
+    value: token,
+    path: "/",
+    httpOnly: true,
+    sameSite: "none",
+    secure: isSecure,
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+    domain: domain ?? undefined,
+  });
+
+  response.cookies.set({
+    name: LEGACY_SECURE_ADMIN_COOKIE_NAME,
+    value: token,
+    path: "/",
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+    maxAge: ADMIN_COOKIE_MAX_AGE,
+  });
 }
 
 export function extractTokenFromAuthResponse(response: unknown): string | null {
@@ -398,6 +412,24 @@ export function clearAdminCookieOnResponse(response: NextResponse, requestUrl?: 
   const isSecure = isSecureRequest(requestUrl, headers);
   const domain = getCookieDomain(requestUrl, headers);
 
-  appendSetCookieHeader(response, ADMIN_COOKIE_NAME, "", isSecure, true, domain);
-  appendSetCookieHeader(response, LEGACY_SECURE_ADMIN_COOKIE_NAME, "", true, true, null);
+  response.cookies.set({
+    name: ADMIN_COOKIE_NAME,
+    value: "",
+    path: "/",
+    httpOnly: true,
+    sameSite: "none",
+    secure: isSecure,
+    maxAge: 0,
+    domain: domain ?? undefined,
+  });
+
+  response.cookies.set({
+    name: LEGACY_SECURE_ADMIN_COOKIE_NAME,
+    value: "",
+    path: "/",
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+    maxAge: 0,
+  });
 }
