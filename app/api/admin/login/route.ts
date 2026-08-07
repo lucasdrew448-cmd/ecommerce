@@ -19,6 +19,12 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({ success: true }, { status: 200 });
     setAdminCookieOnResponse(response, token, request.url, request.headers);
+
+    const setCookieHeader = response.headers.getSetCookie?.() ?? [];
+    if (setCookieHeader.length > 0) {
+      response.headers.set("x-admin-debug-cookies", setCookieHeader.join(" || "));
+    }
+
     return response;
   } catch (error) {
     return NextResponse.json(
