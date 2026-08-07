@@ -8,7 +8,7 @@ const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
 export const ADMIN_COOKIE_NAME = "headless_admin";
 const LEGACY_SECURE_ADMIN_COOKIE_NAME = "__Host-headless_admin";
 
-const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://charlesdiscus.website";
+const EXTERNAL_ADMIN_AUTH_URL = process.env.EXTERNAL_ADMIN_AUTH_URL || "https://discus-web-app-2-0.onrender.com/";
 
 function getExternalAdminAuthUrl(): string {
   if (!EXTERNAL_ADMIN_AUTH_URL) {
