@@ -37,7 +37,7 @@ export default function AdminSuppliersClient({ initialSuppliers }: { initialSupp
   const refresh = async () => {
     const response = await fetch("/api/admin/suppliers", {
       cache: "no-store",
-      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+      headers: {},
     });
     const data = await response.json();
     setSuppliers(data as Supplier[]);
@@ -65,7 +65,7 @@ export default function AdminSuppliersClient({ initialSuppliers }: { initialSupp
     try {
       const response = await fetch(endpoint, {
         method,
-        headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -106,7 +106,7 @@ export default function AdminSuppliersClient({ initialSuppliers }: { initialSupp
 
     const response = await fetch(`/api/admin/suppliers/${supplier.id}`, {
       method: "DELETE",
-      headers: { "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+      headers: {},
     });
     if (response.ok) {
       setMessage(`Deleted ${supplier.name}.`);

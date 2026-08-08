@@ -209,7 +209,7 @@ export default function CheckoutPage() {
     try {
       const response = await fetch("/api/orders", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload),
       });
 

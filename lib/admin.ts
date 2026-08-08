@@ -7,7 +7,7 @@ declare const process: {
 };
 
 const DEFAULT_COMMERCE_API_URL = "https://www.charlesdiscus.website/api";
-const API_KEY = process.env.X_API_KEY || process.env.API_KEY || "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54";
+const API_KEY = process.env.X_API_KEY || process.env.API_KEY;
 
 export type AdminProductInput = {
   id?: string;
@@ -570,11 +570,13 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit, forwardedHe
   const isFormDataBody = typeof FormData !== "undefined" && init?.body instanceof FormData;
 
   const mergedHeaders: Record<string, string> = {
-    "x-api-key": API_KEY,
     ...normalizeHeaders(init?.headers),
     ...normalizeHeaders(forwardedHeaders),
     ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
   };
+  if (API_KEY) {
+    mergedHeaders["x-api-key"] = API_KEY;
+  }
 
   // Debug: show which headers will be forwarded upstream for troubleshooting
   // (do not log raw tokens in production)

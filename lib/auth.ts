@@ -5,7 +5,7 @@ declare const process: {
 };
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "change-this-secret";
-const API_KEY = process.env.X_API_KEY || process.env.API_KEY || "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54";
+const API_KEY = process.env.X_API_KEY || process.env.API_KEY;
 export const ADMIN_COOKIE_NAME = "headless_admin";
 const LEGACY_SECURE_ADMIN_COOKIE_NAME = "__Host-headless_admin";
 
@@ -24,7 +24,7 @@ async function fetchExternalAdminAuth(path: string, body: unknown): Promise<unkn
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": API_KEY,
+      ...(API_KEY ? { "x-api-key": API_KEY } : {}),
     },
     body: JSON.stringify(body),
   });
@@ -168,7 +168,7 @@ async function verifyOpaqueToken(token: string): Promise<boolean> {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
-        "x-api-key": API_KEY,
+        ...(API_KEY ? { "x-api-key": API_KEY } : {}),
       },
       cache: "no-store",
     });

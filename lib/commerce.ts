@@ -8,7 +8,7 @@ declare const process: {
 
 const API_BASE_PATH = "/api";
 const DEFAULT_COMMERCE_API_URL = "https://www.charlesdiscus.website/api";
-const API_KEY = process.env.X_API_KEY || process.env.API_KEY || "384e88ad67a80921a1f72a213df30b642586af2177609942bff7e3e956758c54";
+const API_KEY = process.env.X_API_KEY || process.env.API_KEY;
 
 function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_COMMERCE_API_URL || process.env.COMMERCE_API_URL || DEFAULT_COMMERCE_API_URL;
@@ -34,7 +34,7 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T>
     redirect,
     headers: {
       ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      "x-api-key": API_KEY,
+      ...(API_KEY ? { "x-api-key": API_KEY } : {}),
       ...init?.headers,
     },
   });
@@ -53,7 +53,7 @@ async function fetchCommerceApi<T>(path: string, init?: RequestInit): Promise<T>
       redirect,
       headers: {
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
-        "x-api-key": API_KEY,
+        ...(API_KEY ? { "x-api-key": API_KEY } : {}),
         ...init?.headers,
       },
     });
