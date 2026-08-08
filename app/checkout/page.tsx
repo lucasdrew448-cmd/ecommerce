@@ -95,7 +95,10 @@ export default function CheckoutPage() {
   }, [sameAsShipping, form.address, form.country]);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 0 ? 12 : 0;
+  // Reservation fees are deposits to hold a bike — no physical product is shipped,
+  // so they don't incur shipping costs.
+  const hasShippableItems = items.some((item) => !item.id.endsWith("-reservation"));
+  const shipping = hasShippableItems ? 12 : 0;
   const tax = subtotal * 0.0;
   const total = subtotal + shipping + tax;
   const currency = items[0]?.currency || "$";
@@ -561,7 +564,18 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <dt>Shipping</dt>
-                  <dd className="font-medium text-slate-900">{currency}{shipping.toFixed(2)}</dd>
+                  <dd className="font-medium text-slate-900">
+                    {shipping === 0 ? (
+                      <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3 w-3" aria-hidden="true">
+                          <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        Free
+                      </span>
+                    ) : (
+                      `${currency}${shipping.toFixed(2)}`
+                    )}
+                  </dd>
                 </div>
                 <div className="flex justify-between text-slate-600">
                   <dt>Tax</dt>

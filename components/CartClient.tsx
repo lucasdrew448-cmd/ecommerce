@@ -121,18 +121,26 @@ export default function CartClient() {
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = promoApplied ? subtotal * 0.1 : 0;
-  const shipping = subtotal > 0 ? (subtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST) : 0;
+  // Reservation fees are deposits to hold a bike — no physical product is shipped,
+  // so they don't count toward shipping or the free shipping threshold.
+  const hasShippableItems = items.some((item) => !item.id.endsWith("-reservation"));
+  const shippableSubtotal = items
+    .filter((item) => !item.id.endsWith("-reservation"))
+    .reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shipping = hasShippableItems
+    ? (shippableSubtotal - discount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST)
+    : 0;
   const tax = (subtotal - discount) * 0.0;
   const total = subtotal - discount + shipping + tax;
   const currency = items[0]?.currency || "$";
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const shippingProgress = useMemo(() => {
-    if (subtotal === 0) return 0;
-    return Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
-  }, [subtotal]);
+    if (shippableSubtotal === 0) return 0;
+    return Math.min(100, (shippableSubtotal / FREE_SHIPPING_THRESHOLD) * 100);
+  }, [shippableSubtotal]);
 
-  const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
+  const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - shippableSubtotal);
 
   if (!items.length) {
     return (
@@ -194,11 +202,11 @@ export default function CartClient() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.2fr_0.8fr]">
       {/* Cart items column */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex items-center justify-between">
-          <div>
+      <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
             <h2 className="text-lg font-bold text-slate-900">Cart items</h2>
             <p className="mt-0.5 text-xs text-slate-500">
               {itemCount} item{itemCount === 1 ? "" : "s"} in your cart
@@ -207,7 +215,7 @@ export default function CartClient() {
           <button
             type="button"
             onClick={clearCart}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5" aria-hidden="true">
               <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" strokeLinecap="round" strokeLinejoin="round" />
@@ -217,11 +225,11 @@ export default function CartClient() {
         </div>
 
         {/* Free shipping progress */}
-        <div className="mt-5 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50 p-4">
+        <div className="mt-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50 p-3.5 sm:mt-5 sm:p-4">
           {remainingForFreeShipping > 0 ? (
             <div>
-              <p className="flex items-center gap-2 text-sm font-semibold text-blue-800">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
+              <p className="flex items-center gap-2 text-xs font-semibold text-blue-800 sm:text-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0" aria-hidden="true">
                   <path d="M5 18H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M14 9h4l3 3v5a1 1 0 0 1-1 1h-1" strokeLinecap="round" strokeLinejoin="round" />
                   <circle cx="7" cy="18" r="2" />
@@ -237,8 +245,8 @@ export default function CartClient() {
               </div>
             </div>
           ) : (
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" aria-hidden="true">
+            <p className="flex items-center gap-2 text-xs font-semibold text-emerald-700 sm:text-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4 shrink-0" aria-hidden="true">
                 <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               You've unlocked free express shipping!
@@ -247,7 +255,7 @@ export default function CartClient() {
         </div>
 
         {/* Cart items list */}
-        <ul className="mt-6 divide-y divide-slate-100">
+        <ul className="mt-4 divide-y divide-slate-100 sm:mt-6">
           {items.map((item) => {
             const isReservation = item.id.endsWith("-reservation");
             const lineTotal = item.price * item.quantity;
@@ -256,24 +264,24 @@ export default function CartClient() {
             return (
               <li
                 key={item.id}
-                className={`flex gap-4 py-5 transition-opacity duration-200 ${isRemoving ? "opacity-0" : "opacity-100"}`}
+                className={`flex gap-3 py-4 transition-opacity duration-200 sm:gap-4 sm:py-5 ${isRemoving ? "opacity-0" : "opacity-100"}`}
               >
                 {/* Product image placeholder */}
-                <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 sm:h-28 sm:w-28">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-28 sm:w-28 sm:rounded-2xl">
                   {isReservation ? (
-                    <span className="text-3xl" aria-hidden="true">📋</span>
+                    <span className="text-2xl sm:text-3xl" aria-hidden="true">📋</span>
                   ) : (
-                    <span className="text-3xl" aria-hidden="true">🏍️</span>
+                    <span className="text-2xl sm:text-3xl" aria-hidden="true">🏍️</span>
                   )}
                 </div>
 
                 {/* Item details */}
                 <div className="flex min-w-0 flex-1 flex-col">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-2 sm:gap-3">
                     <div className="min-w-0">
                       <Link
                         href={`/product/${item.slug}`}
-                        className="line-clamp-1 text-sm font-semibold text-slate-900 transition hover:text-blue-600 sm:text-base"
+                        className="line-clamp-2 text-sm font-semibold text-slate-900 transition hover:text-blue-600 sm:line-clamp-1 sm:text-base"
                       >
                         {item.name}
                       </Link>
@@ -299,7 +307,12 @@ export default function CartClient() {
                     </span>
                   </div>
 
-                  <div className="mt-auto flex items-center justify-between pt-3">
+                  {/* Mobile: unit price below name */}
+                  <span className="mt-1 text-xs text-slate-500 sm:hidden">
+                    {item.currency}{item.price.toFixed(2)} each
+                  </span>
+
+                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
                     {/* Quantity controls */}
                     <div className="flex items-center rounded-full border border-slate-200 bg-slate-50">
                       <button
@@ -327,8 +340,8 @@ export default function CartClient() {
                       </button>
                     </div>
 
-                    {/* Unit price */}
-                    <span className="text-xs text-slate-500">
+                    {/* Unit price (desktop only) */}
+                    <span className="hidden text-xs text-slate-500 sm:inline">
                       {item.currency}{item.price.toFixed(2)} each
                     </span>
 
@@ -352,7 +365,7 @@ export default function CartClient() {
         </ul>
 
         {/* Continue shopping */}
-        <div className="mt-6 border-t border-slate-100 pt-5">
+        <div className="mt-4 border-t border-slate-100 pt-4 sm:mt-6 sm:pt-5">
           <Link
             href="/store"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 transition hover:text-blue-600"
@@ -367,21 +380,21 @@ export default function CartClient() {
 
       {/* Order summary column */}
       <aside className="lg:sticky lg:top-32 lg:self-start">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-8">
           <h2 className="text-lg font-bold text-slate-900">Order summary</h2>
           <p className="mt-1 text-xs text-slate-500">
             {itemCount} item{itemCount === 1 ? "" : "s"} · {currency}{subtotal.toFixed(2)} subtotal
           </p>
 
           {/* Mini item list */}
-          <ul className="mt-5 space-y-2.5">
+          <ul className="mt-4 space-y-2.5 sm:mt-5">
             {items.map((item) => (
               <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[0.65rem] font-bold text-slate-600">
                     {item.quantity}
                   </span>
-                  <span className="truncate text-slate-700">{item.name}</span>
+                  <span className="line-clamp-1 text-slate-700">{item.name}</span>
                 </span>
                 <span className="shrink-0 font-semibold text-slate-900">
                   {item.currency}{(item.price * item.quantity).toFixed(2)}
@@ -391,11 +404,11 @@ export default function CartClient() {
           </ul>
 
           {/* Promo code */}
-          <div className="mt-5">
+          <div className="mt-4 sm:mt-5">
             <label htmlFor="promo" className="mb-1.5 block text-xs font-semibold text-slate-700">
               Promo code
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-2">
               <input
                 id="promo"
                 type="text"
@@ -410,7 +423,7 @@ export default function CartClient() {
               <button
                 type="button"
                 onClick={applyPromo}
-                className="shrink-0 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="shrink-0 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:w-auto"
               >
                 Apply
               </button>
@@ -429,7 +442,7 @@ export default function CartClient() {
           </div>
 
           {/* Totals */}
-          <dl className="mt-5 space-y-2.5 border-t border-slate-100 pt-5 text-sm">
+          <dl className="mt-4 space-y-2.5 border-t border-slate-100 pt-4 text-sm sm:mt-5 sm:pt-5">
             <div className="flex justify-between text-slate-600">
               <dt>Subtotal</dt>
               <dd className="font-medium text-slate-900">{currency}{subtotal.toFixed(2)}</dd>
@@ -468,7 +481,7 @@ export default function CartClient() {
           {/* Checkout button */}
           <Link
             href="/checkout"
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 sm:mt-6"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
               <rect x="3" y="11" width="18" height="11" rx="2" />
@@ -478,7 +491,7 @@ export default function CartClient() {
           </Link>
 
           {/* Trust badges */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-slate-100 pt-5 text-xs font-medium text-slate-500">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-slate-100 pt-4 text-xs font-medium text-slate-500 sm:mt-5 sm:pt-5">
             {trustBadges.map((badge) => (
               <span key={badge.label} className="flex items-center gap-1.5">
                 <span aria-hidden="true">{badge.icon}</span>
