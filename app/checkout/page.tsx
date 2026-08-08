@@ -386,34 +386,36 @@ export default function CheckoutPage() {
                       </div>
                       <FieldError message={showFieldError("cardNumber", cardValidation.number)} />
                     </div>
-                    <div>
-                      <label className={labelClass} htmlFor="expiry">Expiry</label>
-                      <input
-                        id="expiry"
-                        className={inputClass(!!showFieldError("expiry", cardValidation.expiry))}
-                        value={form.expiry}
-                        onChange={(e) => setForm({ ...form, expiry: formatExpiry(e.target.value) })}
-                        onBlur={() => handleBlur("expiry")}
-                        placeholder="MM/YY"
-                        autoComplete="cc-exp"
-                        required
-                      />
-                      <FieldError message={showFieldError("expiry", cardValidation.expiry)} />
-                    </div>
-                    <div>
-                      <label className={labelClass} htmlFor="cvv">CVV</label>
-                      <input
-                        id="cvv"
-                        className={inputClass(!!showFieldError("cvv", cardValidation.cvv))}
-                        value={form.cvv}
-                        onChange={(e) => setForm({ ...form, cvv: e.target.value.replace(/\D/g, "").slice(0, cvvLength) })}
-                        onBlur={() => handleBlur("cvv")}
-                        placeholder="123"
-                        inputMode="numeric"
-                        autoComplete="cc-csc"
-                        required
-                      />
-                      <FieldError message={showFieldError("cvv", cardValidation.cvv)} />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor="expiry">Expiry</label>
+                        <input
+                          id="expiry"
+                          className={inputClass(!!showFieldError("expiry", cardValidation.expiry))}
+                          value={form.expiry}
+                          onChange={(e) => setForm({ ...form, expiry: formatExpiry(e.target.value) })}
+                          onBlur={() => handleBlur("expiry")}
+                          placeholder="MM/YY"
+                          autoComplete="cc-exp"
+                          required
+                        />
+                        <FieldError message={showFieldError("expiry", cardValidation.expiry)} />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="cvv">CVV</label>
+                        <input
+                          id="cvv"
+                          className={inputClass(!!showFieldError("cvv", cardValidation.cvv))}
+                          value={form.cvv}
+                          onChange={(e) => setForm({ ...form, cvv: e.target.value.replace(/\D/g, "").slice(0, cvvLength) })}
+                          onBlur={() => handleBlur("cvv")}
+                          placeholder="123"
+                          inputMode="numeric"
+                          autoComplete="cc-csc"
+                          required
+                        />
+                        <FieldError message={showFieldError("cvv", cardValidation.cvv)} />
+                      </div>
                     </div>
                   </div>
                 </div>
