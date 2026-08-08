@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
     { href: "/admin/products", label: "Products", description: "Create, edit, remove catalog products" },
     { href: "/admin/categories", label: "Categories", description: "Manage product categories" },
     { href: "/admin/product-types", label: "Product types", description: "Manage product types" },
-    { href: "/admin/suppliers", label: "Suppliers", description: "Manage fish suppliers" },
+    { href: "/admin/suppliers", label: "Suppliers", description: "Manage bike suppliers" },
     { href: "/admin/hero", label: "Hero banners", description: "Manage homepage slider" },
     { href: "/admin/reviews", label: "Reviews", description: "Approve, reject, moderate reviews" },
     { href: "/admin/orders", label: "Orders", description: "Update statuses and send emails" },
@@ -35,7 +35,7 @@ export default async function AdminDashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1>Admin dashboard</h1>
-              <p>Manage the full Discus ecommerce catalog, reviews, orders, and site content.</p>
+              <p>Manage the full Used Dirt Bike ecommerce catalog, reviews, orders, and site content.</p>
             </div>
             <form action="/admin/logout" method="POST">
               <button
@@ -75,7 +75,7 @@ export default async function AdminDashboardPage() {
       <section className="section">
         <div className="section-header">
           <h2>Management tools</h2>
-          <p>Use the sections below to manage your Discus ecommerce store.</p>
+          <p>Use the sections below to manage your Used Dirt Bike ecommerce store.</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

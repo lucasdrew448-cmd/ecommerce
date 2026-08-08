@@ -74,9 +74,9 @@ export default function Header() {
       <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs sm:px-6 lg:px-8">
           <p className="flex items-center gap-2 font-medium">
-            <span aria-hidden="true">🐟</span>
+            <span aria-hidden="true">🏍️</span>
             <span className="hidden sm:inline">
-              Free express shipping on orders over $150 — healthy, hand-picked discus delivered to your door.
+              Free express shipping on orders over $150 — inspected, hand-picked used dirt bikes delivered to your door.
             </span>
             <span className="sm:hidden">Free shipping over $150</span>
           </p>
@@ -108,13 +108,13 @@ export default function Header() {
       >
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:gap-6 lg:px-8">
           {/* Brand */}
-          <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="Discus Fish Store home">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="Used Dirt Bike Store home">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 text-lg shadow-md shadow-blue-600/20">
-              🐟
+              🏍️
             </span>
             <span className="flex flex-col leading-tight">
               <span className="text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">
-                Discus Fish
+                Used Dirt Bike
               </span>
               <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-blue-600">
                 Store
@@ -143,7 +143,7 @@ export default function Header() {
               type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search discus fish, food, supplies…"
+              placeholder="Search used dirt bikes, parts, gear…"
               aria-label="Search products"
               className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-24 text-sm text-slate-900 placeholder-slate-400 transition focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30"
             />
@@ -250,7 +250,7 @@ export default function Header() {
               </Link>
             ))}
             <span className="ml-auto py-3 text-xs font-medium text-slate-400">
-              🐠 100% live-arrival guarantee
+              🏍️ 100% inspected guarantee
             </span>
           </div>
         </nav>

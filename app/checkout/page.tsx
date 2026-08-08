@@ -27,7 +27,7 @@ function readCart(): CartItem[] {
 const trustBadges = [
   { label: "Secure checkout", icon: "🔒" },
   { label: "Encrypted payment", icon: "🛡️" },
-  { label: "100% live arrival", icon: "🐟" },
+  { label: "100% inspected", icon: "🏍️" },
 ];
 
 function SectionHeader({ index, title, subtitle }: { index: number; title: string; subtitle: string }) {
@@ -252,7 +252,7 @@ export default function CheckoutPage() {
         </nav>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">Checkout</h1>
         <p className="text-sm text-slate-600">
-          Complete your order securely. Your fish will be carefully packed and shipped with our live-arrival guarantee.
+          Complete your order securely. Your dirt bike will be carefully crated and shipped with our inspection guarantee.
         </p>
       </div>
 

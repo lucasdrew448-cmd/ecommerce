@@ -1,6 +1,6 @@
-# Discus Fish Store — External Website
+# Used Dirt Bike Store — External Website
 
-A Next.js 14 headless ecommerce storefront that integrates with the **Discus E-commerce API**.
+A Next.js 14 headless ecommerce storefront that integrates with the **Used Dirt Bike E-commerce API**.
 
 ## Quick start
 
@@ -21,7 +21,7 @@ ADMIN_SECRET=change-this-secret
 
 | Variable | Description |
 |----------|-------------|
-| `NEXT_PUBLIC_COMMERCE_API_URL` | The Discus E-commerce API base URL |
+| `NEXT_PUBLIC_COMMERCE_API_URL` | The Used Dirt Bike E-commerce API base URL |
 | `EXTERNAL_ADMIN_AUTH_URL` | The external API host for admin auth (no `/api` suffix) |
 | `ADMIN_SECRET` | The admin secret used to authenticate admin registration/login |
 
@@ -89,7 +89,7 @@ Admin auth uses the external admin API with an HTTP-only cookie.
 ## Architecture
 
 The storefront uses Next.js API proxy routes (`/api/*`) that forward requests to the external
-Discus E-commerce API. This keeps admin credentials and API calls server-side.
+Used Dirt Bike E-commerce API. This keeps admin credentials and API calls server-side.
 
 - `lib/types.ts` — shared TypeScript types
 - `lib/commerce.ts` — public commerce API client

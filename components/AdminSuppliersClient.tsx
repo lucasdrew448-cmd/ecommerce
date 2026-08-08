@@ -122,7 +122,7 @@ export default function AdminSuppliersClient({ initialSuppliers }: { initialSupp
       <section className="card">
         <div className="section-header" style={{ padding: 0, marginBottom: 16 }}>
           <h2>Supplier editor</h2>
-          <p>Create or update fish suppliers.</p>
+          <p>Create or update bike suppliers.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4">
@@ -240,7 +240,7 @@ export default function AdminSuppliersClient({ initialSuppliers }: { initialSupp
       <section className="card">
         <div className="section-header" style={{ padding: 0, marginBottom: 16 }}>
           <h2>Suppliers</h2>
-          <p>Manage the fish supplier directory.</p>
+          <p>Manage the bike supplier directory.</p>
         </div>
 
         <div className="grid gap-3">

@@ -88,10 +88,10 @@ export default function AdminLoginPage() {
           <div className="relative">
             <Link href="/" className="flex items-center gap-2.5">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-lg backdrop-blur-sm">
-                🐟
+                🏍️
               </span>
               <span className="flex flex-col leading-tight">
-                <span className="text-base font-extrabold tracking-tight">Discus Fish</span>
+                <span className="text-base font-extrabold tracking-tight">Used Dirt Bike</span>
                 <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-blue-100">
                   Admin Console
                 </span>
@@ -134,11 +134,11 @@ export default function AdminLoginPage() {
             {/* Mobile brand */}
             <Link href="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 text-lg shadow-md shadow-blue-600/20">
-                🐟
+                🏍️
               </span>
               <span className="flex flex-col leading-tight">
                 <span className="text-base font-extrabold tracking-tight text-slate-900">
-                  Discus Fish
+                  Used Dirt Bike
                 </span>
                 <span className="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-blue-600">
                   Admin Console

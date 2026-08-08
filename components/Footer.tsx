@@ -41,7 +41,7 @@ const socialLinks = [
 
 const shopLinks = [
   { label: "All Products", href: "/store" },
-  { label: "Discus Fish", href: "/store?search=discus" },
+  { label: "Used Dirt Bikes", href: "/store?search=dirt+bike" },
   { label: "Cart", href: "/cart" },
   { label: "Checkout", href: "/checkout" },
 ];
@@ -74,10 +74,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-white">Discus Fish Store</h3>
+            <h3 className="text-lg font-bold text-white">Used Dirt Bike Store</h3>
             <p className="text-sm leading-relaxed text-slate-400">
-              Premium discus fish for sale. Healthy, hand-picked discus fish with expert
-              support and safe shipping. Your trusted source for quality freshwater fish.
+              Quality used dirt bikes for sale. Inspected, hand-picked used dirt bikes with
+              expert support and safe shipping. Your trusted source for off-road motorcycles.
             </p>
             {/* Social media icons */}
             <div className="flex gap-3 pt-2">
@@ -154,7 +154,7 @@ export default function Footer() {
             <div>
               <h4 className="text-base font-semibold text-white">Stay in the loop</h4>
               <p className="mt-1 text-sm text-slate-400">
-                Subscribe for care tips, new arrivals, and exclusive offers.
+                Subscribe for maintenance tips, new arrivals, and exclusive offers.
               </p>
             </div>
             <form className="flex w-full max-w-md flex-row items-center gap-2">
@@ -178,7 +178,7 @@ export default function Footer() {
       <div className="border-t border-slate-800">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:px-8">
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Discus Fish Store. All rights reserved.
+            © {new Date().getFullYear()} Used Dirt Bike Store. All rights reserved.
           </p>
 
           {/* Payment methods */}

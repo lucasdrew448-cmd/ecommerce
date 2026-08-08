@@ -22,7 +22,7 @@ export default async function AdminSuppliersPage() {
       <section className="section">
         <div className="section-header">
           <h1>Supplier management</h1>
-          <p>Create, edit, and remove fish suppliers from the connected commerce API.</p>
+          <p>Create, edit, and remove bike suppliers from the connected commerce API.</p>
         </div>
         <AdminSuppliersClient initialSuppliers={suppliers} />
       </section>

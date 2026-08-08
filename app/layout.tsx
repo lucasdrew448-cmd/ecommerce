@@ -5,11 +5,11 @@ import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: {
-    default: "Discus Fish Store — Premium Discus Fish",
-    template: "%s | Discus Fish Store",
+    default: "Used Dirt Bike Store — Quality Used Dirt Bikes",
+    template: "%s | Used Dirt Bike Store",
   },
-  description: "Premium discus fish for sale. Healthy, hand-picked discus fish with expert support and safe shipping.",
-  keywords: ["discus fish", "discus fish for sale", "premium discus", "aquarium fish", "freshwater fish"],
+  description: "Quality used dirt bikes for sale. Inspected, hand-picked used dirt bikes with expert support and safe shipping.",
+  keywords: ["used dirt bike", "used dirt bikes for sale", "premium dirt bike", "off-road motorcycle", "dirt bike"],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

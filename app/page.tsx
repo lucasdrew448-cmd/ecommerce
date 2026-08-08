@@ -5,16 +5,16 @@ import ProductCard from "@/components/ProductCard";
 export const dynamic = "force-dynamic";
 
 const stats = [
-  { value: "10k+", label: "Happy aquarists" },
-  { value: "500+", label: "Discus in stock" },
+  { value: "10k+", label: "Happy riders" },
+  { value: "500+", label: "Dirt bikes in stock" },
   { value: "4.9★", label: "Average rating" },
-  { value: "100%", label: "Live arrival" },
+  { value: "100%", label: "Inspected" },
 ];
 
 const features = [
   {
     title: "Premium quality",
-    description: "Healthy, vibrant discus fish raised with care and attention by experienced breeders.",
+    description: "Quality used dirt bikes inspected and maintained by experienced mechanics.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden="true">
         <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6L12 2z" strokeLinecap="round" strokeLinejoin="round" />
@@ -23,7 +23,7 @@ const features = [
   },
   {
     title: "Expert support",
-    description: "Friendly guidance on fish care, water quality, and aquarium setup from real specialists.",
+    description: "Friendly guidance on bike maintenance, parts, and off-road riding from real specialists.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden="true">
         <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -32,7 +32,7 @@ const features = [
   },
   {
     title: "Safe shipping",
-    description: "Climate-controlled packaging and reliable overnight delivery to protect your fish.",
+    description: "Secure crating and reliable delivery to protect your dirt bike in transit.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden="true">
         <rect x="1" y="3" width="15" height="13" rx="1" />
@@ -43,8 +43,8 @@ const features = [
     ),
   },
   {
-    title: "Quarantined stock",
-    description: "Every fish is quarantined and health-checked before it reaches your aquarium.",
+    title: "Inspected stock",
+    description: "Every bike is inspected and serviced before it reaches your garage.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden="true">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
@@ -57,15 +57,15 @@ const features = [
 const steps = [
   {
     title: "Browse the collection",
-    description: "Explore hand-picked discus fish and aquarium supplies curated for quality.",
+    description: "Explore hand-picked used dirt bikes and riding gear curated for quality.",
   },
   {
     title: "Place your order",
     description: "Secure checkout with multiple payment options and fast, careful shipping.",
   },
   {
-    title: "Welcome your fish",
-    description: "Receive healthy, acclimated fish with care instructions and ongoing support.",
+    title: "Ride your bike",
+    description: "Receive your inspected, ready-to-ride dirt bike with support and guidance.",
   },
 ];
 
@@ -105,15 +105,15 @@ export default async function HomePage() {
         <div className="relative grid gap-8 p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:p-12">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-              <span aria-hidden="true">🐟</span>
-              {hero ? "Premium Discus Fish" : "Discus Fish Store"}
+              <span aria-hidden="true">🏍️</span>
+              {hero ? "Premium Used Dirt Bikes" : "Used Dirt Bike Store"}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl">
-              {hero?.title || "Premium discus fish for your aquarium."}
+              {hero?.title || "Quality used dirt bikes for your next ride."}
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-slate-600">
               {hero?.description ||
-                "Browse our selection of healthy, hand-picked discus fish — raised with care, quarantined for health, and shipped safely to your door."}
+                "Browse our selection of inspected, hand-picked used dirt bikes — serviced for performance, checked for safety, and shipped to your door."}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -160,7 +160,7 @@ export default async function HomePage() {
                 <ul className="mt-4 space-y-3 text-slate-700">
                   <li className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs text-white">✓</span>
-                    Healthy, quarantined discus fish
+                    Inspected, serviced dirt bikes
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs text-white">✓</span>
@@ -183,8 +183,8 @@ export default async function HomePage() {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">100% Live Arrival</p>
-                  <p className="text-xs text-slate-500">Guaranteed on every order</p>
+                  <p className="text-sm font-bold text-slate-900">100% Inspected</p>
+                  <p className="text-xs text-slate-500">Guaranteed on every bike</p>
                 </div>
               </div>
             </div>
@@ -198,7 +198,7 @@ export default async function HomePage() {
           <div className="mb-5 flex items-end justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-slate-900">Shop by category</h2>
-              <p className="mt-1 text-sm text-slate-600">Find exactly what your aquarium needs.</p>
+              <p className="mt-1 text-sm text-slate-600">Find exactly what your garage needs.</p>
             </div>
             <Link href="/store" className="text-sm font-semibold text-blue-600 transition hover:text-blue-700">
               View all →
@@ -212,7 +212,7 @@ export default async function HomePage() {
                 className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md"
               >
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 text-lg">
-                  🐠
+                  🏍️
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate font-semibold text-slate-900 group-hover:text-blue-600">
@@ -234,7 +234,7 @@ export default async function HomePage() {
           <div>
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">Hand-picked</span>
             <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">Featured products</h2>
-            <p className="mt-1 text-sm text-slate-600">Explore our selection of premium discus fish.</p>
+            <p className="mt-1 text-sm text-slate-600">Explore our selection of quality used dirt bikes.</p>
           </div>
           <Link href="/store" className="text-sm font-semibold text-blue-600 transition hover:text-blue-700">
             View all →
@@ -277,7 +277,7 @@ export default async function HomePage() {
             Built for quality and care
           </h2>
           <p className="mt-3 text-slate-600">
-            From healthy stock to expert guidance, we make keeping discus rewarding and worry-free.
+            From inspected stock to expert guidance, we make owning a dirt bike rewarding and worry-free.
           </p>
         </div>
 
@@ -302,7 +302,7 @@ export default async function HomePage() {
         <div className="mb-8 text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">How it works</span>
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Your fish, in three simple steps
+            Your bike, in three simple steps
           </h2>
         </div>
 
@@ -377,9 +377,9 @@ export default async function HomePage() {
 
         <div className="relative flex flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
           <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold sm:text-3xl">Ready to find your next discus?</h2>
+            <h2 className="text-2xl font-bold sm:text-3xl">Ready to find your next dirt bike?</h2>
             <p className="mt-3 text-blue-100">
-              Join thousands of aquarists who trust us for healthy, vibrant fish and expert support.
+              Join thousands of riders who trust us for quality, inspected bikes and expert support.
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3">

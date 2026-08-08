@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getCategories, getProducts } from "@/lib/commerce";
 
 export const metadata = {
-  title: "Store — Discus Fish",
+  title: "Store — Used Dirt Bikes",
 };
 
 export const dynamic = "force-dynamic";
@@ -32,7 +32,7 @@ export default async function StorePage({ searchParams }: StorePageProps) {
         </p>
         <h1 className="text-3xl font-bold text-slate-900">Browse all products</h1>
         <p className="mt-4 max-w-2xl text-lg text-slate-600">
-          Discover premium discus fish and aquarium products.
+          Discover quality used dirt bikes and riding gear.
         </p>
 
         <form method="get" className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
