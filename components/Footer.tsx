@@ -157,7 +157,7 @@ export default function Footer() {
                 Subscribe for care tips, new arrivals, and exclusive offers.
               </p>
             </div>
-            <form className="flex w-full max-w-md gap-2">
+            <form className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
               <input
                 type="email"
                 placeholder="Enter your email"
@@ -165,7 +165,7 @@ export default function Footer() {
               />
               <button
                 type="submit"
-                className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                className="w-full rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 sm:w-auto"
               >
                 Subscribe
               </button>
