@@ -1,11 +1,16 @@
 import Link from "next/link";
 import CartClient from "@/components/CartClient";
+import { getProducts } from "@/lib/commerce";
 
 export const metadata = {
   title: "Your Cart — Used Dirt Bikes",
 };
 
-export default function CartPage() {
+export const dynamic = "force-dynamic";
+
+export default async function CartPage() {
+  const products = await getProducts();
+
   return (
     <main className="space-y-6">
       {/* Page header */}
@@ -21,7 +26,7 @@ export default function CartPage() {
         </p>
       </div>
 
-      <CartClient />
+      <CartClient products={products} />
     </main>
   );
 }

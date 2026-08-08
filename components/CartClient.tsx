@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import type { Product } from "@/lib/types";
 
 type CartItem = {
   id: string;
@@ -42,34 +43,7 @@ const trustBadges = [
   { label: "Free returns", icon: "↩️" },
 ];
 
-const suggestedProducts = [
-  {
-    id: "suggest-1",
-    slug: "essential-tracker",
-    name: "Essential Tracker",
-    price: 149.0,
-    currency: "$",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80&auto=format&fit=crop",
-  },
-  {
-    id: "suggest-2",
-    slug: "artisan-everyday-bag",
-    name: "Artisan Everyday Bag",
-    price: 98.0,
-    currency: "$",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80&auto=format&fit=crop",
-  },
-  {
-    id: "suggest-3",
-    slug: "comfort-sneaker",
-    name: "Comfort Sneaker",
-    price: 129.0,
-    currency: "$",
-    image: "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?w=600&q=80&auto=format&fit=crop",
-  },
-];
-
-export default function CartClient() {
+export default function CartClient({ products }: { products: Product[] }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
@@ -79,6 +53,22 @@ export default function CartClient() {
   useEffect(() => {
     setItems(readCart());
   }, []);
+
+  // Show up to 4 products from the API that aren't already in the cart
+  const suggestedProducts = useMemo(() => {
+    const cartItemIds = new Set(items.map((item) => item.id.replace(/-reservation$/, "")));
+    return products
+      .filter((p) => !cartItemIds.has(p.id))
+      .slice(0, 4)
+      .map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name,
+        price: p.price,
+        currency: p.currency,
+        image: p.image || p.images?.[0] || "",
+      }));
+  }, [products, items]);
 
   const updateQuantity = (id: string, delta: number) => {
     const next = items
@@ -171,32 +161,40 @@ export default function CartClient() {
         </div>
 
         {/* Suggested products */}
-        <div className="mt-12 border-t border-slate-100 pt-8">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">You might also like</h3>
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
-            {suggestedProducts.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.slug}`}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:border-blue-300 hover:shadow-md"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="text-sm font-semibold text-slate-900">{product.name}</p>
-                  <p className="mt-1 text-sm font-bold text-blue-600">
-                    {product.currency}{product.price.toFixed(2)}
-                  </p>
-                </div>
-              </Link>
-            ))}
+        {suggestedProducts.length > 0 ? (
+          <div className="mt-12 border-t border-slate-100 pt-8">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">You might also like</h3>
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {suggestedProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.slug}`}
+                  className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:border-blue-300 hover:shadow-md"
+                >
+                  <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-3xl text-slate-300" aria-hidden="true">
+                        🏍️
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <p className="line-clamp-1 text-sm font-semibold text-slate-900">{product.name}</p>
+                    <p className="mt-1 text-sm font-bold text-blue-600">
+                      {product.currency}{product.price.toFixed(2)}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </section>
     );
   }
