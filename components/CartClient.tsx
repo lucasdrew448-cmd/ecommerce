@@ -37,10 +37,43 @@ function writeCart(items: CartItem[]) {
 }
 
 const trustBadges = [
-  { label: "Secure checkout", icon: "🔒" },
-  { label: "Encrypted payment", icon: "🛡️" },
-  { label: "100% inspected", icon: "🏍️" },
-  { label: "Free returns", icon: "↩️" },
+  {
+    label: "Secure checkout",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5" aria-hidden="true">
+        <rect x="3" y="6" width="18" height="13" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 10h17.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7 15h2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    label: "Encrypted payment",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="m21 21-4.3-4.3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M11 8v3l2 2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    label: "100% inspected",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5" aria-hidden="true">
+        <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6L12 2z" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    label: "Free returns",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5" aria-hidden="true">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 3v5h5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function CartClient({ products }: { products: Product[] }) {
@@ -135,8 +168,12 @@ export default function CartClient({ products }: { products: Product[] }) {
   if (!items.length) {
     return (
       <section className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:p-16">
-        <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 text-4xl">
-          🛒
+        <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-cyan-50">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-10 w-10 text-blue-600" aria-hidden="true">
+            <rect x="3" y="6" width="18" height="13" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M3 10h17.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M7 15h2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </span>
         <h2 className="mt-6 text-2xl font-bold text-slate-900">Your cart is empty</h2>
         <p className="mx-auto mt-3 max-w-md text-sm text-slate-600">
@@ -179,8 +216,13 @@ export default function CartClient({ products }: { products: Product[] }) {
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-3xl text-slate-300" aria-hidden="true">
-                        🏍️
+                      <div className="flex h-full w-full items-center justify-center bg-slate-100" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-12 w-12 text-slate-300" >
+                          <path d="M5.1 7.5l2.4 2.4.6-1.2h7.8l.6 1.2 2.4-2.4" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="7" cy="17" r="2.5" />
+                          <circle cx="17" cy="17" r="2.5" />
+                          <path d="M9.5 17h5M6.5 14.5V12M17.5 14.5V12M12 9V5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
                       </div>
                     )}
                   </div>
@@ -267,9 +309,16 @@ export default function CartClient({ products }: { products: Product[] }) {
                 {/* Product image placeholder */}
                 <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-28 sm:w-28 sm:rounded-2xl">
                   {isReservation ? (
-                    <span className="text-2xl sm:text-3xl" aria-hidden="true">📋</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-10 w-10 text-slate-400 sm:h-14 sm:w-14" aria-hidden="true">
+                      <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6L12 2z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   ) : (
-                    <span className="text-2xl sm:text-3xl" aria-hidden="true">🏍️</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-10 w-10 text-slate-400 sm:h-14 sm:w-14" aria-hidden="true">
+                      <path d="M5.1 7.5l2.4 2.4.6-1.2h7.8l.6 1.2 2.4-2.4" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="7" cy="17" r="2.5" />
+                      <circle cx="17" cy="17" r="2.5" />
+                      <path d="M9.5 17h5M6.5 14.5V12M17.5 14.5V12M12 9V5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   )}
                 </div>
 
@@ -492,7 +541,7 @@ export default function CartClient({ products }: { products: Product[] }) {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-slate-100 pt-4 text-xs font-medium text-slate-500 sm:mt-5 sm:pt-5">
             {trustBadges.map((badge) => (
               <span key={badge.label} className="flex items-center gap-1.5">
-                <span aria-hidden="true">{badge.icon}</span>
+                {badge.icon}
                 {badge.label}
               </span>
             ))}
