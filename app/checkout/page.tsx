@@ -386,8 +386,8 @@ export default function CheckoutPage() {
                       </div>
                       <FieldError message={showFieldError("cardNumber", cardValidation.number)} />
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div>
+                    <div className="grid grid-cols-2 gap-4 md:col-span-2">
+                      <div className="min-w-0">
                         <label className={labelClass} htmlFor="expiry">Expiry</label>
                         <input
                           id="expiry"
@@ -401,7 +401,7 @@ export default function CheckoutPage() {
                         />
                         <FieldError message={showFieldError("expiry", cardValidation.expiry)} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <label className={labelClass} htmlFor="cvv">CVV</label>
                         <input
                           id="cvv"
