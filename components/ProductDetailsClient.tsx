@@ -68,7 +68,6 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
   return (
     <div className="card">
       <p className="eyebrow">Ready to purchase</p>
-      <p className="product-description">Add this item to a browser cart or integrate a headless cart API here.</p>
       <div className="flex flex-col gap-3">
         <button className="button" onClick={addToCart}>
           {added ? "Added to cart" : "Add to cart"}
