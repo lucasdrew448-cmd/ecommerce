@@ -70,7 +70,7 @@ const paymentMethods = [
 
 export default function Footer() {
   return (
-    <footer className="mt-12 border-t border-slate-200 bg-slate-900 text-slate-300">
+    <footer className="mt-12 border-t border-[#e5d6c3] bg-[#4a3222] text-[#f7ebdf]">
       {/* Main footer content */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -85,7 +85,7 @@ export default function Footer() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">Trusted since 2012</p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed text-slate-400">
+            <p className="text-sm leading-relaxed text-[#d8b280]">
               Quality used dirt bikes for sale. Inspected, hand-picked used dirt bikes with
               expert support and safe shipping. Your trusted source for off-road motorcycles.
             </p>
@@ -98,7 +98,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={social.name}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-800 text-slate-400 transition hover:bg-blue-600 hover:text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#5e3f29] text-[#f7ebdf] transition hover:bg-[#8b5e3c] hover:text-white"
                 >
                   {social.icon}
                 </a>
@@ -114,7 +114,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-400 transition hover:text-blue-400"
+                    className="text-sm text-[#e8cfae] transition hover:text-[#f7ebdf]"
                   >
                     {link.label}
                   </Link>
@@ -131,7 +131,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-400 transition hover:text-blue-400"
+                    className="text-sm text-[#e8cfae] transition hover:text-[#f7ebdf]"
                   >
                     {link.label}
                   </Link>
@@ -148,7 +148,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-400 transition hover:text-blue-400"
+                    className="text-sm text-[#e8cfae] transition hover:text-[#f7ebdf]"
                   >
                     {link.label}
                   </Link>
@@ -159,11 +159,11 @@ export default function Footer() {
         </div>
 
         {/* Newsletter signup */}
-        <div className="mt-10 rounded-2xl border border-slate-700 bg-slate-800/50 p-6">
+        <div className="mt-10 rounded-2xl border border-[#6f4c32] bg-[#5e3f29]/70 p-6">
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div>
               <h4 className="text-base font-semibold text-white">Stay in the loop</h4>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-[#e8cfae]">
                 Subscribe for maintenance tips, new arrivals, and exclusive offers.
               </p>
             </div>
@@ -171,11 +171,11 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="min-w-0 flex-1 rounded-full border border-slate-600 bg-slate-900 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="min-w-0 flex-1 rounded-full border border-[#7a5337] bg-[#2f241d] px-4 py-2.5 text-sm text-white placeholder-[#c69b6d] focus:border-[#d8b280] focus:outline-none focus:ring-1 focus:ring-[#d8b280]"
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                className="shrink-0 rounded-full bg-[#8b5e3c] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#a76d43]"
               >
                 Subscribe
               </button>
@@ -185,20 +185,20 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-slate-800">
+      <div className="border-t border-[#6f4c32]">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 sm:px-6 lg:flex-row lg:px-8">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[#d8b280]">
             © {new Date().getFullYear()} Used Dirt Bike Store. All rights reserved.
           </p>
 
           {/* Payment methods */}
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-500">We accept:</span>
+            <span className="text-xs text-[#d8b280]">We accept:</span>
             <div className="flex gap-2">
               {paymentMethods.map((method) => (
                 <span
                   key={method.name}
-                  className="flex h-7 items-center justify-center rounded-md border border-slate-700 bg-slate-800 px-2 text-xs font-medium text-slate-400"
+                  className="flex h-7 items-center justify-center rounded-md border border-[#6f4c32] bg-[#5e3f29] px-2 text-xs font-medium text-[#f7ebdf]"
                 >
                   {method.name}
                 </span>
@@ -207,11 +207,11 @@ export default function Footer() {
           </div>
 
           {/* Legal links */}
-          <div className="flex gap-4 text-sm text-slate-500">
-            <Link href="/about" className="transition hover:text-slate-300">
+          <div className="flex gap-4 text-sm text-[#d8b280]">
+            <Link href="/about" className="transition hover:text-[#f7ebdf]">
               Privacy Policy
             </Link>
-            <Link href="/about" className="transition hover:text-slate-300">
+            <Link href="/about" className="transition hover:text-[#f7ebdf]">
               Terms of Service
             </Link>
           </div>
