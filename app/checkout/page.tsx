@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import cardValidator from "card-validator";
+import searchIcon from "@/components/svg/Secure-Medium-Silver.svg";
+import paymentIcon from "@/components/svg/payment-card-svgrepo-com.svg";
+import inspect from "@/components/svg/search-look-inspect-magnifying-glass-svgrepo-com.svg"
 
 type CartItem = {
   id: string;
@@ -25,9 +28,9 @@ function readCart(): CartItem[] {
 }
 
 const trustBadges = [
-  { label: "Secure checkout", icon: "🔒" },
-  { label: "Encrypted payment", icon: "🛡️" },
-  { label: "100% inspected", icon: "🏍️" },
+  { label: "Secure checkout", icon: searchIcon },
+  { label: "Encrypted payment", icon: paymentIcon },
+  { label: "100% inspected", icon: inspect },
 ];
 
 function SectionHeader({ index, title, subtitle }: { index: number; title: string; subtitle: string }) {
@@ -571,8 +574,8 @@ export default function CheckoutPage() {
               {/* Trust badges */}
               <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-slate-100 pt-5 text-xs font-medium text-slate-500">
                 {trustBadges.map((badge) => (
-                  <span key={badge.label} className="flex items-center gap-1.5">
-                    <span aria-hidden="true">{badge.icon}</span>
+                  <span key={badge.label} className="flex items-center gap-2">
+                    <img src={badge.icon} alt="" className="h-4 w-4" aria-hidden="true" />
                     {badge.label}
                   </span>
                 ))}
