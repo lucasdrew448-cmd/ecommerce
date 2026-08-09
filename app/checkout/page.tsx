@@ -82,7 +82,7 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [sameAsShipping, setSameAsShipping] = useState(true);
+  const [sameAsShipping, setSameAsShipping] = useState(false);
 
   useEffect(() => {
     setItems(readCart());
@@ -389,7 +389,7 @@ export default function CheckoutPage() {
                           value={form.cardNumber}
                           onChange={(e) => setForm({ ...form, cardNumber: formatCardNumber(e.target.value) })}
                           onBlur={() => handleBlur("cardNumber")}
-                          placeholder="4242 4242 4242 4242"
+                          placeholder="4242 3450 0211 9033"
                           inputMode="numeric"
                           autoComplete="cc-number"
                           required
@@ -446,7 +446,7 @@ export default function CheckoutPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Billing details</p>
-                      <p className="text-xs text-slate-500">You can use your shipping address or enter a different billing address.</p>
+                      <p className="text-xs text-slate-500">You can use your shipping address or enter billing address.</p>
                     </div>
                     {sameAsShipping ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
@@ -465,7 +465,7 @@ export default function CheckoutPage() {
                       className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="flex items-center gap-1.5">
-                      <span className="text-emerald-600">✓</span>
+                    
                       Use shipping address for billing
                     </span>
                   </label>
