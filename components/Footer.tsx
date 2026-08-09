@@ -65,7 +65,9 @@ const companyLinks = [
 const paymentMethods = [
   { name: "Visa", icon: "💳" },
   { name: "Mastercard", icon: "💳" },
-  { name: "Amex", icon: "💳" },
+  { name: "American Express", icon: "💳" },
+  { name: "Discover", icon: "💳" },
+
 ];
 
 export default function Footer() {
