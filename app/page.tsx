@@ -174,18 +174,16 @@ export default async function HomePage() {
               </div>
             )}
 
-            {/* Floating badge */}
-            <div className="absolute -bottom-4 -left-4 hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg sm:block">
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
-                    <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">100% Inspected</p>
-                  <p className="text-xs text-slate-500">Guaranteed on every bike</p>
-                </div>
+            {/* Inspection badge */}
+            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg sm:max-w-[240px]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <div>
+                <p className="text-sm font-bold text-slate-900">100% Inspected</p>
+                <p className="text-xs text-slate-500">Guaranteed on every bike</p>
               </div>
             </div>
           </div>
