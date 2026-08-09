@@ -55,8 +55,8 @@ export default function GlobalButtonLoader() {
       window.setTimeout(() => hideLoading(button), 1000);
     };
 
-    document.addEventListener("click", handleClick, true);
-    return () => document.removeEventListener("click", handleClick, true);
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, []);
 
   return null;
