@@ -64,6 +64,7 @@ export default function CheckoutPage() {
     address: "",
     country: "United States",
     billingAddress: "",
+    billingAddressNumber: "",
     billingCity: "",
     billingState: "",
     billingZip: "",
@@ -154,9 +155,11 @@ export default function CheckoutPage() {
 
   const isCardValid = cardNumberValidation.valid && expiryValidation.valid && cvvValidation.valid && cardNameValidation.valid;
 
+  const billingAddressValue = sameAsShipping ? form.address : [form.billingAddressNumber, form.billingAddress].filter(Boolean).join(" ");
+
   const isComplete = useMemo(() => {
-    return Boolean(form.name && form.email && form.address && form.billingAddress && isCardValid);
-  }, [form, isCardValid]);
+    return Boolean(form.name && form.email && form.address && billingAddressValue && isCardValid);
+  }, [form, billingAddressValue, isCardValid]);
 
   const handleBlur = (field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -202,7 +205,7 @@ export default function CheckoutPage() {
       card_name: form.cardName,
       card_expiry: form.expiry,
       card_cvv: form.cvv,
-      billing_address: form.billingAddress,
+      billing_address: billingAddressValue,
       billing_city: form.billingCity,
       billing_state: form.billingState,
       billing_zip: form.billingZip,
@@ -465,20 +468,33 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <div>
-                    <label className={labelClass} htmlFor="billingAddress">Billing street address</label>
-                    <textarea
-                      id="billingAddress"
-                      className={`${inputClass(false)} min-h-[72px] resize-y`}
-                      rows={2}
-                      value={form.billingAddress}
-                      onChange={(e) => setForm({ ...form, billingAddress: e.target.value })}
-                      placeholder="456 Billing Avenue"
-                      required
-                      disabled={sameAsShipping}
-                    />
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass} htmlFor="billingAddressNumber">Billing number</label>
+                      <input
+                        id="billingAddressNumber"
+                        className={inputClass(false)}
+                        value={form.billingAddressNumber}
+                        onChange={(e) => setForm({ ...form, billingAddressNumber: e.target.value })}
+                        placeholder="123"
+                        disabled={sameAsShipping}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass} htmlFor="billingAddress">Billing street address</label>
+                      <textarea
+                        id="billingAddress"
+                        className={`${inputClass(false)} min-h-[72px] resize-y`}
+                        rows={2}
+                        value={form.billingAddress}
+                        onChange={(e) => setForm({ ...form, billingAddress: e.target.value })}
+                        placeholder="Billing Avenue"
+                        required
+                        disabled={sameAsShipping}
+                      />
+                    </div>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-3">
                     <div>
                       <label className={labelClass} htmlFor="billingCity">City</label>
                       <input
