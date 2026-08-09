@@ -143,6 +143,10 @@ p {
   box-shadow: 0 12px 30px rgba(139, 94, 60, 0.2);
 }
 
+.button.text-blue-600 {
+  color: var(--brand-600) !important;
+}
+
 .section-header {
   display: flex;
   flex-direction: column;
