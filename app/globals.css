@@ -3,10 +3,56 @@
 :root {
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f5f7fb;
-  color: #0f172a;
+  background: #f8f3ec;
+  color: #2f241d;
   line-height: 1.6;
+  --brand-50: #f8efe7;
+  --brand-100: #f2e1ce;
+  --brand-200: #e8cfae;
+  --brand-300: #d8b280;
+  --brand-400: #c58d55;
+  --brand-500: #b06d35;
+  --brand-600: #8b5e3c;
+  --brand-700: #724b2f;
+  --brand-800: #5e3f29;
+  --brand-900: #4a3222;
 }
+
+.text-blue-50 { color: var(--brand-50) !important; }
+.text-blue-100 { color: var(--brand-100) !important; }
+.text-blue-200 { color: var(--brand-200) !important; }
+.text-blue-300 { color: var(--brand-300) !important; }
+.text-blue-400 { color: var(--brand-400) !important; }
+.text-blue-500 { color: var(--brand-500) !important; }
+.text-blue-600 { color: var(--brand-600) !important; }
+.text-blue-700 { color: var(--brand-700) !important; }
+.text-blue-800 { color: var(--brand-800) !important; }
+.text-blue-900 { color: var(--brand-900) !important; }
+
+.bg-blue-50 { background-color: var(--brand-50) !important; }
+.bg-blue-100 { background-color: var(--brand-100) !important; }
+.bg-blue-200 { background-color: var(--brand-200) !important; }
+.bg-blue-500 { background-color: var(--brand-500) !important; }
+.bg-blue-600 { background-color: var(--brand-600) !important; }
+.bg-blue-700 { background-color: var(--brand-700) !important; }
+
+.border-blue-200 { border-color: var(--brand-200) !important; }
+.border-blue-300 { border-color: var(--brand-300) !important; }
+.border-blue-500 { border-color: var(--brand-500) !important; }
+.border-blue-600 { border-color: var(--brand-600) !important; }
+
+.from-blue-50 { --tw-gradient-from: var(--brand-50) !important; }
+.from-blue-500 { --tw-gradient-from: var(--brand-500) !important; }
+.from-blue-600 { --tw-gradient-from: var(--brand-600) !important; }
+.from-blue-700 { --tw-gradient-from: var(--brand-700) !important; }
+
+.to-cyan-50 { --tw-gradient-to: var(--brand-50) !important; }
+.to-cyan-500 { --tw-gradient-to: var(--brand-500) !important; }
+.to-cyan-600 { --tw-gradient-to: var(--brand-600) !important; }
+
+.via-blue-600 { --tw-gradient-stops: var(--brand-600) 0%, var(--brand-600) 100% !important; }
+
+.shadow-blue-600\/20 { box-shadow: 0 12px 30px rgba(139, 94, 60, 0.2) !important; }
 
 html,
 body {
@@ -16,7 +62,7 @@ body {
 
 body {
   min-height: 100vh;
-  background: radial-gradient(circle at top, #ffffff 0%, #f5f7fb 35%, #e2e8f0 100%);
+  background: radial-gradient(circle at top, #fffdf9 0%, #f8f3ec 35%, #e8d8c7 100%);
 }
 
 * {
@@ -61,7 +107,7 @@ a {
   margin: 0 0 10px;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: #2563eb;
+  color: #8b5e3c;
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -86,7 +132,7 @@ p {
   justify-content: center;
   padding: 0.95rem 1.5rem;
   border-radius: 999px;
-  background: #2563eb;
+  background: #8b5e3c;
   color: white;
   font-weight: 700;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -94,7 +140,7 @@ p {
 
 .button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 12px 30px rgba(139, 94, 60, 0.2);
 }
 
 .section-header {
@@ -176,7 +222,7 @@ p {
 
 .price-block {
   padding: 24px;
-  background: #eef2ff;
+  background: #f5ebdf;
   border-radius: 18px;
   margin-bottom: 24px;
 }
