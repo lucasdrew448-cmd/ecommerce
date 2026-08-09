@@ -261,7 +261,13 @@ export default function CheckoutPage() {
 
       {items.length === 0 ? (
         <section className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl">🛒</span>
+          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-cyan-50">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8 text-blue-600" aria-hidden="true">
+              <rect x="3" y="6" width="18" height="13" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M3 10h17.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M7 15h2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
           <h2 className="mt-4 text-xl font-bold text-slate-900">Your cart is empty</h2>
           <p className="mt-2 text-sm text-slate-600">Add products before checking out.</p>
           <Link
@@ -312,34 +318,24 @@ export default function CheckoutPage() {
               </div>
 
               {/* Shipping */}
-              <div className="space-y-4 border-t border-slate-100 pt-6">
-                <SectionHeader index={2} title="Shipping address" subtitle="Where should we deliver your order?" />
-                <div>
-                  <label className={labelClass} htmlFor="address">Street address</label>
-                  <textarea
-                    id="address"
-                    className={`${inputClass(false)} min-h-[72px] resize-y`}
-                    rows={2}
-                    value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    placeholder="123 Market Street, Apt 4B"
-                    autoComplete="street-address"
-                    required
-                  />
+              {!sameAsShipping ? (
+                <div className="space-y-4 border-t border-slate-100 pt-6">
+                  <SectionHeader index={2} title="Shipping address" subtitle="Where should we deliver your order?" />
+                  <div>
+                    <label className={labelClass} htmlFor="address">Street address</label>
+                    <textarea
+                      id="address"
+                      className={`${inputClass(false)} min-h-[72px] resize-y`}
+                      rows={2}
+                      value={form.address}
+                      onChange={(e) => setForm({ ...form, address: e.target.value })}
+                      placeholder="123 Market Street, Apt 4B"
+                      autoComplete="street-address"
+                      required
+                    />
+                  </div>
                 </div>
-                <label className="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    checked={sameAsShipping}
-                    onChange={(e) => setSameAsShipping(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-emerald-600">✓</span>
-                    Use shipping address for billing
-                  </span>
-                </label>
-              </div>
+              ) : null}
 
               {/* Payment */}
               <div className="space-y-4 border-t border-slate-100 pt-6">
@@ -454,6 +450,18 @@ export default function CheckoutPage() {
                       </span>
                     ) : null}
                   </div>
+                  <label className="mt-3 flex cursor-pointer items-center gap-2.5 text-sm font-medium text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={sameAsShipping}
+                      onChange={(e) => setSameAsShipping(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="flex items-center gap-1.5">
+                      <span className="text-emerald-600">✓</span>
+                      Use shipping address for billing
+                    </span>
+                  </label>
                 </div>
 
                 <div className="space-y-4">
