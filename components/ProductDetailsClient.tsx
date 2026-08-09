@@ -73,7 +73,7 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
           {added ? "Added to cart" : "Add to cart"}
         </button>
         <button
-          className="button border border-blue-600 bg-white text-blue-600 hover:bg-blue-50"
+          className="button"
           onClick={reserveWithFee}
         >
           {reserved ? "Reservation added" : `Reserve with fee (${formattedFee})`}
