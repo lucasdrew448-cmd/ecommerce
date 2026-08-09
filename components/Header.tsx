@@ -74,7 +74,6 @@ export default function Header() {
       <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs sm:px-6 lg:px-8">
           <p className="flex items-center gap-2 font-medium">
-            <span aria-hidden="true">🏍️</span>
             <span className="hidden sm:inline">
               Free express shipping on orders over $150 — inspected, hand-picked used dirt bikes delivered to your door.
             </span>
