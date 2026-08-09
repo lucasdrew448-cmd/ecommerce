@@ -105,7 +105,7 @@ export default async function HomePage() {
         <div className="relative grid gap-8 p-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:p-12">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-              <span aria-hidden="true">🏍️</span>
+            
               {hero ? "Premium Used Dirt Bikes" : "Used Dirt Bike Store"}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl">
