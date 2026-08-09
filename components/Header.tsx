@@ -249,7 +249,7 @@ export default function Header() {
               </Link>
             ))}
             <span className="ml-auto py-3 text-xs font-medium text-slate-400">
-              🏍️ 100% inspected guarantee
+              100% inspected guarantee
             </span>
           </div>
         </nav>
