@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import brandImage from "@/components/svg/IMG-20260808-WA0005.jpg";
 
 const socialLinks = [
   {
@@ -74,7 +76,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand column */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-white">Used Dirt Bike Store</h3>
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+                <Image src={brandImage} alt="Used Dirt Bike Store logo" width={48} height={48} className="h-full w-full object-cover" />
+              </span>
+              <div>
+                <h3 className="text-lg font-bold text-white">Used Dirt Bike Store</h3>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">Trusted since 2012</p>
+              </div>
+            </div>
             <p className="text-sm leading-relaxed text-slate-400">
               Quality used dirt bikes for sale. Inspected, hand-picked used dirt bikes with
               expert support and safe shipping. Your trusted source for off-road motorcycles.
