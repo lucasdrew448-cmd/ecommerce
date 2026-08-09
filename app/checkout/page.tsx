@@ -470,13 +470,13 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className={labelClass} htmlFor="billingAddressNumber">Billing number</label>
+                      <label className={labelClass} htmlFor="billingAddressNumber">Phone number</label>
                       <input
                         id="billingAddressNumber"
                         className={inputClass(false)}
                         value={form.billingAddressNumber}
                         onChange={(e) => setForm({ ...form, billingAddressNumber: e.target.value })}
-                        placeholder="123"
+                        placeholder="+1 555 123 4567"
                         disabled={sameAsShipping}
                       />
                     </div>
@@ -494,7 +494,7 @@ export default function CheckoutPage() {
                       />
                     </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid gap-4 grid-cols-3 sm:grid-cols-3">
                     <div>
                       <label className={labelClass} htmlFor="billingCity">City</label>
                       <input
