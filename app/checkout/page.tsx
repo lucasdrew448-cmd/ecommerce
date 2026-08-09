@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import cardValidator from "card-validator";
 import searchIcon from "@/components/svg/Secure-Medium-Silver.svg";
@@ -575,7 +576,7 @@ export default function CheckoutPage() {
               <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 border-t border-slate-100 pt-5 text-xs font-medium text-slate-500">
                 {trustBadges.map((badge) => (
                   <span key={badge.label} className="flex items-center gap-2">
-                    <img src={badge.icon} alt="" className="h-4 w-4" aria-hidden="true" />
+                    <Image src={badge.icon} alt="" className="h-4 w-4" aria-hidden="true" />
                     {badge.label}
                   </span>
                 ))}
