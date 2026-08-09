@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   },
   description: "Quality used dirt bikes for sale. Inspected, hand-picked used dirt bikes with expert support and safe shipping.",
   keywords: ["used dirt bike", "used dirt bikes for sale", "premium dirt bike", "off-road motorcycle", "dirt bike"],
+  icons: {
+    icon: [{ url: "/favicon.jpg", type: "image/jpeg" }],
+    apple: [{ url: "/favicon.jpg", type: "image/jpeg" }],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

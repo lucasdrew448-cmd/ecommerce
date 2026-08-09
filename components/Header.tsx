@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import brandImage from "@/components/svg/IMG-20260808-WA0005.jpg";
 
 const STORAGE_KEY = "headless-cart";
 
@@ -108,8 +110,8 @@ export default function Header() {
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:gap-6 lg:px-8">
           {/* Brand */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="Used Dirt Bike Store home">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 text-lg shadow-md shadow-blue-600/20">
-              🏍️
+            <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white shadow-md shadow-blue-600/20">
+              <Image src={brandImage} alt="Used Dirt Bike Store logo" width={40} height={40} className="h-full w-full object-cover" />
             </span>
             <span className="flex flex-col leading-tight">
               <span className="text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">
