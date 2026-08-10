@@ -13,7 +13,7 @@ const navLinks = [
   { label: "Store", href: "/store" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
-  { label: "Admin", href: "/admin" },
+  
 ];
 
 export default function Header() {
@@ -159,16 +159,7 @@ export default function Header() {
           {/* Actions */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
             {/* Account */}
-            <Link
-              href="/admin"
-              aria-label="Account"
-              className="hidden h-10 w-10 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100 hover:text-blue-600 sm:inline-flex"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </Link>
+            
 
             {/* Cart */}
             <Link
