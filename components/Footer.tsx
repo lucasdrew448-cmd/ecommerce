@@ -51,15 +51,12 @@ const shopLinks = [
 const supportLinks = [
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
-  { label: "Order Tracking", href: "/order" },
   { label: "FAQ", href: "/contact" },
 ];
 
 const companyLinks = [
   { label: "Our Story", href: "/about" },
-  { label: "Sustainability", href: "/about" },
-  { label: "Blog", href: "/about" },
-  { label: "Careers", href: "/about" },
+
 ];
 
 const paymentMethods = [
@@ -143,21 +140,7 @@ export default function Footer() {
           </div>
 
           {/* Company column */}
-          <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">Company</h4>
-            <ul className="space-y-2">
-              {companyLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-[#e8cfae] transition hover:text-[#f7ebdf]"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          
         </div>
 
         {/* Newsletter signup */}

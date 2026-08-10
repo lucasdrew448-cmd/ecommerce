@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="product-panel">
           <div className="price-block">
             <span className="price">{product.currency}{product.price.toFixed(2)}</span>
-            <p className="price-note">Fast, secure checkout with confirmation email.</p>
+            <p className="price-note">Fast and secure checkout</p>
           </div>
           <ProductDetailsClient product={product} />
         </div>
