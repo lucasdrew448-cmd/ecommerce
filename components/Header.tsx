@@ -77,9 +77,9 @@ export default function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs sm:px-6 lg:px-8">
           <p className="flex items-center gap-2 font-medium">
             <span className="hidden sm:inline">
-              Free express shipping on orders over $150 — inspected, hand-picked used dirt bikes delivered to your door.
+              Reserve the bike of your choice as low as $20
             </span>
-            <span className="sm:hidden">Free shipping over $150</span>
+            <span className="sm:hidden">Reserve your bike at only $20</span>
           </p>
           <div className="hidden items-center gap-4 sm:flex">
             <Link href="/store" className="font-medium transition hover:text-blue-100">
