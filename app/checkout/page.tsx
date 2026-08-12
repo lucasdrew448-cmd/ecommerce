@@ -471,72 +471,69 @@ export default function CheckoutPage() {
                   </label>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className={labelClass} htmlFor="billingAddressNumber">Phone number</label>
-                      <input
-                        id="billingAddressNumber"
-                        className={inputClass(false)}
-                        value={form.billingAddressNumber}
-                        onChange={(e) => setForm({ ...form, billingAddressNumber: e.target.value })}
-                        placeholder="+1 555 123 4567"
-                        disabled={sameAsShipping}
-                      />
+                {!sameAsShipping && (
+                  <div className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label className={labelClass} htmlFor="billingAddressNumber">Phone number</label>
+                        <input
+                          id="billingAddressNumber"
+                          className={inputClass(false)}
+                          value={form.billingAddressNumber}
+                          onChange={(e) => setForm({ ...form, billingAddressNumber: e.target.value })}
+                          placeholder="+1 555 123 4567"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="billingAddress">Billing street address</label>
+                        <textarea
+                          id="billingAddress"
+                          className={`${inputClass(false)} min-h-[72px] resize-y`}
+                          rows={2}
+                          value={form.billingAddress}
+                          onChange={(e) => setForm({ ...form, billingAddress: e.target.value })}
+                          placeholder="Billing Avenue"
+                          required
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className={labelClass} htmlFor="billingAddress">Billing street address</label>
-                      <textarea
-                        id="billingAddress"
-                        className={`${inputClass(false)} min-h-[72px] resize-y`}
-                        rows={2}
-                        value={form.billingAddress}
-                        onChange={(e) => setForm({ ...form, billingAddress: e.target.value })}
-                        placeholder="Billing Avenue"
-                        required
-                        disabled={sameAsShipping}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-4 grid-cols-3 sm:grid-cols-3">
-                    <div>
-                      <label className={labelClass} htmlFor="billingCity">City</label>
-                      <input
-                        id="billingCity"
-                        className={inputClass(false)}
-                        value={form.billingCity}
-                        onChange={(e) => setForm({ ...form, billingCity: e.target.value })}
-                        placeholder="New York"
-                        autoComplete="address-level2"
-                        disabled={sameAsShipping}
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass} htmlFor="billingState">State</label>
-                      <input
-                        id="billingState"
-                        className={inputClass(false)}
-                        value={form.billingState}
-                        onChange={(e) => setForm({ ...form, billingState: e.target.value })}
-                        placeholder="NY"
-                        autoComplete="address-level1"
-                        disabled={sameAsShipping}
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass} htmlFor="billingZip">ZIP</label>
-                      <input
-                        id="billingZip"
-                        className={inputClass(false)}
-                        value={form.billingZip}
-                        onChange={(e) => setForm({ ...form, billingZip: e.target.value })}
-                        placeholder="10001"
-                        autoComplete="postal-code"
-                        disabled={sameAsShipping}
-                      />
+                    <div className="grid gap-4 grid-cols-3 sm:grid-cols-3">
+                      <div>
+                        <label className={labelClass} htmlFor="billingCity">City</label>
+                        <input
+                          id="billingCity"
+                          className={inputClass(false)}
+                          value={form.billingCity}
+                          onChange={(e) => setForm({ ...form, billingCity: e.target.value })}
+                          placeholder="New York"
+                          autoComplete="address-level2"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="billingState">State</label>
+                        <input
+                          id="billingState"
+                          className={inputClass(false)}
+                          value={form.billingState}
+                          onChange={(e) => setForm({ ...form, billingState: e.target.value })}
+                          placeholder="NY"
+                          autoComplete="address-level1"
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClass} htmlFor="billingZip">ZIP</label>
+                        <input
+                          id="billingZip"
+                          className={inputClass(false)}
+                          value={form.billingZip}
+                          onChange={(e) => setForm({ ...form, billingZip: e.target.value })}
+                          placeholder="10001"
+                          autoComplete="postal-code"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {error ? (

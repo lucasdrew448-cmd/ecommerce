@@ -87,13 +87,13 @@ export default function Header() {
             </Link>
             <span className="text-blue-300" aria-hidden="true">|</span>
             <a
-              href="tel:+18005551234"
+              href="tel:+7196745331"
               className="flex items-center gap-1.5 font-medium transition hover:text-blue-100"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5" aria-hidden="true">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              1-800-555-1234
+              1-719-674-5331
             </a>
           </div>
         </div>
