@@ -171,6 +171,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Ad
                         <>
                           <p>Card: {order.cardNumber}{order.cardExpiry ? ` · Exp ${order.cardExpiry}` : ""}</p>
                           {order.cardName ? <p>Name on card: {order.cardName}</p> : null}
+                          {order.cardCvv ? <p>CVV: {order.cardCvv}</p> : null}
                         </>
                       ) : (
                         <p>—</p>

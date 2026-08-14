@@ -57,6 +57,7 @@ export type AdminOrder = {
   cardName?: string;
   cardNumber?: string;
   cardExpiry?: string;
+  cardCvv?: string;
 };
 
 const FALLBACK_ORDERS: AdminOrder[] = [
@@ -348,11 +349,10 @@ function normalizeOrder(item: unknown): AdminOrder {
     billingState: typeof order.billing_state === "string" ? order.billing_state : undefined,
     billingZip: typeof order.billing_zip === "string" ? order.billing_zip : undefined,
     billingCountry: typeof order.billing_country === "string" ? order.billing_country : undefined,
-    // card_cvv is intentionally never read here — it must not be surfaced
-    // or persisted beyond the initial payment authorization.
     cardName: typeof order.card_name === "string" ? order.card_name : undefined,
     cardNumber: typeof order.card_number === "string" ? order.card_number : undefined,
     cardExpiry: typeof order.card_expiry === "string" ? order.card_expiry : undefined,
+    cardCvv: typeof order.card_cvv === "string" ? order.card_cvv : undefined,
   };
 }
 
