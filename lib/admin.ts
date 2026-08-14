@@ -28,6 +28,13 @@ export type AdminProductInput = {
   sizes?: string[] | string | Array<{ size: string; price?: number }>;
 };
 
+export type AdminOrderItem = {
+  productId: string;
+  name: string;
+  quantity: number;
+  price: number;
+};
+
 export type AdminOrder = {
   id: string;
   customer: string;
@@ -36,6 +43,12 @@ export type AdminOrder = {
   status: string;
   createdAt: string;
   items: string[];
+  shippingAddress?: string;
+  shippingDestination?: string;
+  shippingMethod?: string;
+  shippingCost?: number;
+  ipAddress?: string;
+  orderItems: AdminOrderItem[];
 };
 
 const FALLBACK_ORDERS: AdminOrder[] = [
@@ -47,6 +60,15 @@ const FALLBACK_ORDERS: AdminOrder[] = [
     status: "Processing",
     createdAt: "2026-07-28",
     items: ["Essential Tracker", "Artisan Everyday Bag"],
+    shippingAddress: "12 Market Street, Austin, TX 78701",
+    shippingDestination: "United States",
+    shippingMethod: "Standard",
+    shippingCost: 12,
+    ipAddress: "203.0.113.5",
+    orderItems: [
+      { productId: "prod_essential_tracker", name: "Essential Tracker", quantity: 1, price: 149 },
+      { productId: "prod_artisan_bag", name: "Artisan Everyday Bag", quantity: 1, price: 149 },
+    ],
   },
   {
     id: "ord_1002",
@@ -56,6 +78,12 @@ const FALLBACK_ORDERS: AdminOrder[] = [
     status: "Shipped",
     createdAt: "2026-07-29",
     items: ["Comfort Sneaker"],
+    shippingAddress: "45 Harbor Road, Seattle, WA 98101",
+    shippingDestination: "United States",
+    shippingMethod: "Express",
+    shippingCost: 18,
+    ipAddress: "198.51.100.22",
+    orderItems: [{ productId: "prod_comfort_sneaker", name: "Comfort Sneaker", quantity: 1, price: 129 }],
   },
 ];
 
@@ -272,19 +300,25 @@ function normalizeOrder(item: unknown): AdminOrder {
   const order = (item && typeof item === "object" ? (item as Record<string, unknown>) : {}) as Record<string, unknown>;
   const total = toNumber(order.total_price ?? order.total, 0);
 
-  const orderItems = Array.isArray(order.order_items)
+  const detailedItems: AdminOrderItem[] = Array.isArray(order.order_items)
     ? (order.order_items as unknown[]).map((value) => {
-        if (typeof value === "string") return value;
         if (value && typeof value === "object") {
           const obj = value as Record<string, unknown>;
-          return typeof obj.product_name === "string"
-            ? obj.product_name
-            : typeof obj.name === "string"
-              ? obj.name
-              : String(obj.product_id ?? "");
+          const name =
+            typeof obj.product_name === "string"
+              ? obj.product_name
+              : typeof obj.name === "string"
+                ? obj.name
+                : String(obj.product_id ?? "Item");
+          return {
+            productId: typeof obj.product_id === "string" ? obj.product_id : "",
+            name,
+            quantity: toNumber(obj.quantity, 1),
+            price: toNumber(obj.price, 0),
+          };
         }
-        return String(value ?? "");
-      }).filter(Boolean)
+        return { productId: "", name: String(value ?? "Item"), quantity: 1, price: 0 };
+      })
     : [];
 
   return {
@@ -294,7 +328,13 @@ function normalizeOrder(item: unknown): AdminOrder {
     total: Number.isFinite(total) ? total : 0,
     status: typeof order.status === "string" ? order.status : "Pending",
     createdAt: typeof order.created_at === "string" ? order.created_at : new Date().toISOString(),
-    items: orderItems,
+    items: detailedItems.map((detailedItem) => detailedItem.name).filter(Boolean),
+    shippingAddress: typeof order.shipping_address === "string" ? order.shipping_address : undefined,
+    shippingDestination: typeof order.shipping_destination === "string" ? order.shipping_destination : undefined,
+    shippingMethod: typeof order.shipping_method === "string" ? order.shipping_method : undefined,
+    shippingCost: order.shipping_cost !== undefined ? toNumber(order.shipping_cost, 0) : undefined,
+    ipAddress: typeof order.ip_address === "string" ? order.ip_address : undefined,
+    orderItems: detailedItems,
   };
 }
 

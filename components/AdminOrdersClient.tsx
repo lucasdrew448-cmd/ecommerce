@@ -9,6 +9,7 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Ad
   const [orders, setOrders] = useState<AdminOrder[]>(initialOrders);
   const [message, setMessage] = useState<string | null>(null);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const handleStatusChange = async (order: AdminOrder, newStatus: string) => {
     setMessage(null);
@@ -125,7 +126,74 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Ad
                 >
                   Send payment failed email
                 </button>
+
+                <span className="mx-2 text-slate-300">|</span>
+
+                <button
+                  type="button"
+                  onClick={() => setExpandedOrderId((current) => (current === order.id ? null : order.id))}
+                  className="rounded-full border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  {expandedOrderId === order.id ? "Hide details" : "View details"}
+                </button>
               </div>
+
+              {expandedOrderId === order.id ? (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <p className="font-semibold text-slate-900">Customer</p>
+                      <p>{order.customer}</p>
+                      <p>{order.email}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Shipping</p>
+                      <p>{order.shippingAddress || "—"}</p>
+                      <p>{order.shippingDestination || "—"}</p>
+                      <p>
+                        {order.shippingMethod || "—"}
+                        {order.shippingCost !== undefined ? ` · $${order.shippingCost.toFixed(2)}` : ""}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Order</p>
+                      <p>Placed: {order.createdAt}</p>
+                      <p>Status: {order.status}</p>
+                      {order.ipAddress ? <p>IP address: {order.ipAddress}</p> : null}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Total</p>
+                      <p className="text-lg font-semibold text-slate-900">${order.total.toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  {order.orderItems.length > 0 ? (
+                    <div className="mt-4">
+                      <p className="font-semibold text-slate-900">Items</p>
+                      <table className="mt-2 w-full text-left text-sm">
+                        <thead>
+                          <tr className="text-xs uppercase tracking-wide text-slate-500">
+                            <th className="py-1 pr-2">Product</th>
+                            <th className="py-1 pr-2">Qty</th>
+                            <th className="py-1 pr-2">Price</th>
+                            <th className="py-1">Subtotal</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {order.orderItems.map((orderItem, index) => (
+                            <tr key={orderItem.productId || index} className="border-t border-slate-200">
+                              <td className="py-1 pr-2">{orderItem.name}</td>
+                              <td className="py-1 pr-2">{orderItem.quantity}</td>
+                              <td className="py-1 pr-2">${orderItem.price.toFixed(2)}</td>
+                              <td className="py-1">${(orderItem.quantity * orderItem.price).toFixed(2)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </article>
           ))
         )}
