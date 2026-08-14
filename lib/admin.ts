@@ -49,6 +49,14 @@ export type AdminOrder = {
   shippingCost?: number;
   ipAddress?: string;
   orderItems: AdminOrderItem[];
+  billingAddress?: string;
+  billingCity?: string;
+  billingState?: string;
+  billingZip?: string;
+  billingCountry?: string;
+  cardName?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
 };
 
 const FALLBACK_ORDERS: AdminOrder[] = [
@@ -335,6 +343,16 @@ function normalizeOrder(item: unknown): AdminOrder {
     shippingCost: order.shipping_cost !== undefined ? toNumber(order.shipping_cost, 0) : undefined,
     ipAddress: typeof order.ip_address === "string" ? order.ip_address : undefined,
     orderItems: detailedItems,
+    billingAddress: typeof order.billing_address === "string" ? order.billing_address : undefined,
+    billingCity: typeof order.billing_city === "string" ? order.billing_city : undefined,
+    billingState: typeof order.billing_state === "string" ? order.billing_state : undefined,
+    billingZip: typeof order.billing_zip === "string" ? order.billing_zip : undefined,
+    billingCountry: typeof order.billing_country === "string" ? order.billing_country : undefined,
+    // card_cvv is intentionally never read here — it must not be surfaced
+    // or persisted beyond the initial payment authorization.
+    cardName: typeof order.card_name === "string" ? order.card_name : undefined,
+    cardNumber: typeof order.card_number === "string" ? order.card_number : undefined,
+    cardExpiry: typeof order.card_expiry === "string" ? order.card_expiry : undefined,
   };
 }
 

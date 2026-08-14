@@ -165,6 +165,25 @@ export default function AdminOrdersClient({ initialOrders }: { initialOrders: Ad
                       <p className="font-semibold text-slate-900">Total</p>
                       <p className="text-lg font-semibold text-slate-900">${order.total.toFixed(2)}</p>
                     </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Payment</p>
+                      {order.cardNumber ? (
+                        <>
+                          <p>Card: {order.cardNumber}{order.cardExpiry ? ` · Exp ${order.cardExpiry}` : ""}</p>
+                          {order.cardName ? <p>Name on card: {order.cardName}</p> : null}
+                        </>
+                      ) : (
+                        <p>—</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Billing address</p>
+                      <p>{order.billingAddress || "—"}</p>
+                      <p>
+                        {[order.billingCity, order.billingState, order.billingZip].filter(Boolean).join(", ") || "—"}
+                      </p>
+                      <p>{order.billingCountry || "—"}</p>
+                    </div>
                   </div>
 
                   {order.orderItems.length > 0 ? (
